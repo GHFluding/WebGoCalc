@@ -2,18 +2,14 @@ package main
 
 import (
 	"log/slog"
-	"os"
 	"test/internal/config"
 	"test/internal/database/postgres"
-	"test/internal/services/sl"
+	"test/internal/server/http/middleware"
+
+	// setup logger
+	sl "test/internal/services/slogger"
 
 	"github.com/gin-gonic/gin"
-)
-
-const (
-	envLocal = "local"
-	envDev   = "dev"
-	envProd  = "prod"
 )
 
 func main() {
@@ -21,7 +17,7 @@ func main() {
 	cfg := config.MustLoad()
 
 	//init logger: slog
-	log := setupLogger(cfg.Env)
+	log := sl.SetupLogger(cfg.Env)
 
 	//Logger is up
 	log.Info("starting rep_cal", slog.String("env", cfg.Env))
@@ -39,42 +35,13 @@ func main() {
 
 	// use DB here
 	_ = queries
-	//TODO: init router: gin-gonic
-	router := gin.Default()
-	router.Use()
+	//init router: gin-gonic
+	r := gin.Default()
+	r.Use(middleware.RequestIdMiddleware())
+	r.Use(sl.LoggingMiddleware(log))
+	r.Use(middleware.RecoveryMiddleware(log))
 
 	//TODO: init controllers
 
 	//TODO: init Services
-
-}
-
-// setup Logger configuraton
-func setupLogger(env string) *slog.Logger {
-	var log *slog.Logger
-
-	switch env {
-	case envLocal:
-		log = slog.New(
-			slog.NewTextHandler(
-				os.Stdout,
-				&slog.HandlerOptions{Level: slog.LevelDebug},
-			),
-		)
-	case envDev:
-		log = slog.New(
-			slog.NewJSONHandler(
-				os.Stdout,
-				&slog.HandlerOptions{Level: slog.LevelDebug},
-			),
-		)
-	case envProd:
-		log = slog.New(
-			slog.NewJSONHandler(
-				os.Stdout,
-				&slog.HandlerOptions{Level: slog.LevelInfo},
-			),
-		)
-	}
-	return log
 }
