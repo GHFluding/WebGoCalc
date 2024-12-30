@@ -51,23 +51,24 @@ func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (S
 	return i, err
 }
 
-const deleteStudent = `-- name: DeleteStudent :exec
-DELETE FROM students
-WHERE id = $1
+const deleteStudentByName = `-- name: DeleteStudentByName :exec
+DELETE FROM students 
+WHERE name = $1
 `
 
-func (q *Queries) DeleteStudent(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deleteStudent, id)
+func (q *Queries) DeleteStudentByName(ctx context.Context, studentName string) error {
+	_, err := q.db.Exec(ctx, deleteStudentByName, studentName)
 	return err
 }
 
-const getStudent = `-- name: GetStudent :one
-SELECT id, name, clas, scool, order_day, order_time, order_cost FROM students
-WHERE name = $1 LIMIT 1
+const getStudentByName = `-- name: GetStudentByName :one
+SELECT id, name, clas, scool, order_day, order_time, order_cost FROM students 
+WHERE name = $1 
+LIMIT 1
 `
 
-func (q *Queries) GetStudent(ctx context.Context, name string) (Student, error) {
-	row := q.db.QueryRow(ctx, getStudent, name)
+func (q *Queries) GetStudentByName(ctx context.Context, studentName string) (Student, error) {
+	row := q.db.QueryRow(ctx, getStudentByName, studentName)
 	var i Student
 	err := row.Scan(
 		&i.ID,

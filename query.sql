@@ -1,6 +1,8 @@
--- name: GetStudent :one
-SELECT * FROM students
-WHERE name = $1 LIMIT 1;
+-- name: GetStudentByName :one
+SELECT * FROM students 
+WHERE name = @student_name 
+LIMIT 1;
+
 
 -- name: ListStudents :many
 SELECT * FROM students
@@ -24,6 +26,6 @@ SET
   order_cost = $6
 WHERE id = $1;
 
--- name: DeleteStudent :exec
-DELETE FROM students
-WHERE id = $1;
+-- name: DeleteStudentByName :exec
+DELETE FROM students 
+WHERE name = @student_name;

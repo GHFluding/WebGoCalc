@@ -1,7 +1,10 @@
 package sl
 
-import "log/slog"
+import (
+	"log/slog"
+)
 
+// func for err to string in slog
 func Err(err error) slog.Attr {
 	return slog.Attr{
 		Key:   "error",
