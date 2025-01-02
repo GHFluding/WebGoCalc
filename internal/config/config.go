@@ -4,49 +4,80 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
-	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	Env        string `yaml:"env" env-default:"local"` //env-required:"true"
-	Storage    `yaml:"storage"`
-	HTTPServer `yaml:"http_server"`
+	Env        string
+	Storage    Storage
+	HTTPServer HTTPServer
 }
 
 type HTTPServer struct {
-	Address     string        `yaml:"address" env-default:"localhost:8082"`
-	TimeOut     time.Duration `yaml:"timeout" env-default:"5s"`
-	IdleTimeOut time.Duration `yaml:"idle_timeout" env-default:"60s"`
+	Address     string
+	TimeOut     time.Duration
+	IdleTimeOut time.Duration
 }
+
 type Storage struct {
-	Path     string `yaml:"path" env-required:"true"`
-	Host     string `yaml:"host" env-default:"localhost"`
-	Port     int    `yaml:"port" env-default:"5432"`
-	User     string `yaml:"user" env-default:"postgres"`
-	Password string `yaml:"password" env-default:"qwerty"`
-	DBName   string `yaml:"dbname" env-default:"storage"`
+	Path     string
+	Host     string
+	Port     int
+	User     string
+	Password string
+	DBName   string
 	AsString string
 }
 
-// load config
+// MustLoad loads the configuration from environment variables
 func MustLoad() *Config {
-	// if err := godotenv.Load("../../.env"); err != nil {
-	// 	log.Print("No .env file found")
-	// }
-	configPath := os.Getenv("CONFIG_PATH")
-	if configPath == "" {
-		log.Fatalln("config_path is not set")
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
 	}
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		log.Fatalf("config_path is not exist: %s", configPath)
+	env := getEnv("ENV", "local")
+	storagePort, err := strconv.Atoi(getEnv("DB_PORT", "5432"))
+	if err != nil {
+		log.Fatalf("invalid DB_PORT value: %v", err)
 	}
-	var cfg Config
-	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		log.Fatalln("cannot read config")
+
+	httpTimeout, err := time.ParseDuration(getEnv("HTTP_SERVER_TIMEOUT", "5s"))
+	if err != nil {
+		log.Fatalf("invalid HTTP_SERVER_TIMEOUT value: %v", err)
 	}
+
+	httpIdleTimeout, err := time.ParseDuration(getEnv("HTTP_SERVER_IDLE_TIMEOUT", "60s"))
+	if err != nil {
+		log.Fatalf("invalid HTTP_SERVER_IDLE_TIMEOUT value: %v", err)
+	}
+
+	cfg := &Config{
+		Env: env,
+		Storage: Storage{
+			Host:     getEnv("DB_HOST", "postgres"),
+			Port:     storagePort,
+			User:     getEnv("DB_USER", "postgres"),
+			Password: getEnv("DB_PASSWORD", "postgres"),
+			DBName:   getEnv("DB_NAME", "storage"),
+		},
+		HTTPServer: HTTPServer{
+			Address:     getEnv("HTTP_SERVER_ADDRESS", "localhost:8082"),
+			TimeOut:     httpTimeout,
+			IdleTimeOut: httpIdleTimeout,
+		},
+	}
+
 	cfg.Storage.AsString = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		cfg.Storage.Host, cfg.Storage.Port, cfg.Storage.User, cfg.Storage.Password, cfg.Storage.DBName)
-	return &cfg
+	return cfg
+}
+
+func getEnv(key, defaultValue string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return defaultValue
 }
