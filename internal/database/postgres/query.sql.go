@@ -56,8 +56,8 @@ DELETE FROM students
 WHERE name = $1
 `
 
-func (q *Queries) DeleteStudentByName(ctx context.Context, studentName string) error {
-	_, err := q.db.Exec(ctx, deleteStudentByName, studentName)
+func (q *Queries) DeleteStudentByName(ctx context.Context, name string) error {
+	_, err := q.db.Exec(ctx, deleteStudentByName, name)
 	return err
 }
 
@@ -67,8 +67,8 @@ WHERE name = $1
 LIMIT 1
 `
 
-func (q *Queries) GetStudentByName(ctx context.Context, studentName string) (Student, error) {
-	row := q.db.QueryRow(ctx, getStudentByName, studentName)
+func (q *Queries) GetStudentByName(ctx context.Context, name string) (Student, error) {
+	row := q.db.QueryRow(ctx, getStudentByName, name)
 	var i Student
 	err := row.Scan(
 		&i.ID,
@@ -115,7 +115,7 @@ func (q *Queries) ListStudents(ctx context.Context) ([]Student, error) {
 	return items, nil
 }
 
-const updateStudent = `-- name: UpdateStudent :exec
+const updateStudentByName = `-- name: UpdateStudentByName :exec
 UPDATE students
 SET 
   clas = $2,
@@ -123,11 +123,11 @@ SET
   order_day = $4,
   order_time = $5,
   order_cost = $6
-WHERE id = $1
+WHERE name = $1
 `
 
-type UpdateStudentParams struct {
-	ID        int64
+type UpdateStudentByNameParams struct {
+	Name      string
 	Clas      pgtype.Text
 	Scool     pgtype.Text
 	OrderDay  pgtype.Int2
@@ -135,9 +135,9 @@ type UpdateStudentParams struct {
 	OrderCost pgtype.Int2
 }
 
-func (q *Queries) UpdateStudent(ctx context.Context, arg UpdateStudentParams) error {
-	_, err := q.db.Exec(ctx, updateStudent,
-		arg.ID,
+func (q *Queries) UpdateStudentByName(ctx context.Context, arg UpdateStudentByNameParams) error {
+	_, err := q.db.Exec(ctx, updateStudentByName,
+		arg.Name,
 		arg.Clas,
 		arg.Scool,
 		arg.OrderDay,
