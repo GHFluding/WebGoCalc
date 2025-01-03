@@ -12,6 +12,8 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+ENV CONFIG_PATH=./config/local.yaml
+
 
 RUN go build -o main ./cmd/apk/main.go
 

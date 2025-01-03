@@ -1,3 +1,4 @@
+
 services:
   app:
     build:
@@ -7,42 +8,27 @@ services:
     ports:
       - "8080:8080"
     environment:
-      ENV: ${ENV}
-      STORAGE_PATH: ${STORAGE_PATH}
-      STORAGE_HOST: ${DB_HOST}
-      STORAGE_PORT: ${DB_PORT}
-      STORAGE_USER: ${DB_USER}
-      STORAGE_PASSWORD: ${DB_PASSWORD}
-      STORAGE_DBNAME: ${DB_NAME}
-      HTTP_SERVER_ADDRESS: ${HTTP_SERVER_ADDRESS}
-      HTTP_SERVER_TIMEOUT: ${HTTP_SERVER_TIMEOUT}
-      HTTP_SERVER_IDLE_TIMEOUT: ${HTTP_SERVER_IDLE_TIMEOUT}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: your_user
+      DB_PASSWORD: your_password
+      DB_NAME: your_db
     depends_on:
       - postgres
-    networks:
-      - app-network
-    volumes:
-    - ./migrations:/app/migrations  
-
-
   postgres:
-    image: postgres:17
+    image: postgres:15
     container_name: webgocalc_postgres
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: your_user
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: your_db
     ports:
       - "5432:5432"
     volumes:
-      - ./migrations:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - app-network
-
 volumes:
   postgres_data:
-
+  
 networks:
   app-network:
     driver: bridge
