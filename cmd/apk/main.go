@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"test/internal/config"
 	"test/internal/database/postgres"
@@ -11,6 +12,10 @@ import (
 	sl "test/internal/services/slogger"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func main() {
@@ -30,6 +35,30 @@ func main() {
 		log.Info("Failed to connect to database: ", sl.Err(err))
 	}
 	defer dbpool.Close()
+
+	//add migration
+	m, err := migrate.New(
+		"file:///app/migrations", // migartion path
+		fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+			cfg.Storage.User,
+			cfg.Storage.Password,
+			"webgocalc_postgres",
+			cfg.Storage.Port,
+			cfg.Storage.DBName,
+		),
+	)
+	if err != nil {
+		log.Error("Failed to connect migration: ", sl.Err(err))
+	}
+	if m == nil {
+		log.Error("Migration object is nil")
+		return
+	}
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Error("Failed to use migration: ", sl.Err(err))
+	} else {
+		log.Info("Migrations applied successfully!")
+	}
 
 	// use Queries
 	queries := postgres.New(dbpool)

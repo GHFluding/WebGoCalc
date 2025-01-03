@@ -1,8 +1,7 @@
 -- name: GetStudentByName :one
 SELECT * FROM students 
-WHERE name = @student_name 
+WHERE name = $1 
 LIMIT 1;
-
 
 -- name: ListStudents :many
 SELECT * FROM students
@@ -16,7 +15,7 @@ INSERT INTO students (
 )
 RETURNING *;
 
--- name: UpdateStudent :exec
+-- name: UpdateStudentByName :exec
 UPDATE students
 SET 
   clas = $2,
@@ -24,8 +23,8 @@ SET
   order_day = $4,
   order_time = $5,
   order_cost = $6
-WHERE id = $1;
+WHERE name = $1;
 
 -- name: DeleteStudentByName :exec
 DELETE FROM students 
-WHERE name = @student_name;
+WHERE name = $1;
