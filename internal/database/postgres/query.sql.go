@@ -13,17 +13,17 @@ import (
 
 const createStudent = `-- name: CreateStudent :one
 INSERT INTO students (
-  name, clas, scool, order_day, order_time, order_cost
+  name, s_class, school, order_day, order_time, order_cost
 ) VALUES (
   $1, $2, $3, $4, $5, $6
 )
-RETURNING id, name, clas, scool, order_day, order_time, order_cost
+RETURNING id, name, s_class, school, order_day, order_time, order_cost
 `
 
 type CreateStudentParams struct {
 	Name      string
-	Clas      pgtype.Text
-	Scool     pgtype.Text
+	SClass    pgtype.Text
+	School    pgtype.Text
 	OrderDay  pgtype.Int2
 	OrderTime pgtype.Time
 	OrderCost pgtype.Int2
@@ -32,8 +32,8 @@ type CreateStudentParams struct {
 func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (Student, error) {
 	row := q.db.QueryRow(ctx, createStudent,
 		arg.Name,
-		arg.Clas,
-		arg.Scool,
+		arg.SClass,
+		arg.School,
 		arg.OrderDay,
 		arg.OrderTime,
 		arg.OrderCost,
@@ -42,8 +42,8 @@ func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (S
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
-		&i.Clas,
-		&i.Scool,
+		&i.SClass,
+		&i.School,
 		&i.OrderDay,
 		&i.OrderTime,
 		&i.OrderCost,
@@ -62,7 +62,7 @@ func (q *Queries) DeleteStudentByName(ctx context.Context, name string) error {
 }
 
 const getStudentByName = `-- name: GetStudentByName :one
-SELECT id, name, clas, scool, order_day, order_time, order_cost FROM students 
+SELECT id, name, s_class, school, order_day, order_time, order_cost FROM students 
 WHERE name = $1 
 LIMIT 1
 `
@@ -73,8 +73,8 @@ func (q *Queries) GetStudentByName(ctx context.Context, name string) (Student, e
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
-		&i.Clas,
-		&i.Scool,
+		&i.SClass,
+		&i.School,
 		&i.OrderDay,
 		&i.OrderTime,
 		&i.OrderCost,
@@ -83,7 +83,7 @@ func (q *Queries) GetStudentByName(ctx context.Context, name string) (Student, e
 }
 
 const listStudents = `-- name: ListStudents :many
-SELECT id, name, clas, scool, order_day, order_time, order_cost FROM students
+SELECT id, name, s_class, school, order_day, order_time, order_cost FROM students
 ORDER BY name
 `
 
@@ -99,8 +99,8 @@ func (q *Queries) ListStudents(ctx context.Context) ([]Student, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
-			&i.Clas,
-			&i.Scool,
+			&i.SClass,
+			&i.School,
 			&i.OrderDay,
 			&i.OrderTime,
 			&i.OrderCost,
@@ -118,8 +118,8 @@ func (q *Queries) ListStudents(ctx context.Context) ([]Student, error) {
 const updateStudentByName = `-- name: UpdateStudentByName :exec
 UPDATE students
 SET 
-  clas = $2,
-  scool = $3,
+  s_class = $2,
+  school = $3,
   order_day = $4,
   order_time = $5,
   order_cost = $6
@@ -128,8 +128,8 @@ WHERE name = $1
 
 type UpdateStudentByNameParams struct {
 	Name      string
-	Clas      pgtype.Text
-	Scool     pgtype.Text
+	SClass    pgtype.Text
+	School    pgtype.Text
 	OrderDay  pgtype.Int2
 	OrderTime pgtype.Time
 	OrderCost pgtype.Int2
@@ -138,8 +138,8 @@ type UpdateStudentByNameParams struct {
 func (q *Queries) UpdateStudentByName(ctx context.Context, arg UpdateStudentByNameParams) error {
 	_, err := q.db.Exec(ctx, updateStudentByName,
 		arg.Name,
-		arg.Clas,
-		arg.Scool,
+		arg.SClass,
+		arg.School,
 		arg.OrderDay,
 		arg.OrderTime,
 		arg.OrderCost,

@@ -11,8 +11,8 @@ import (
 type Student struct {
 	ID        int64
 	Name      string
-	Clas      pgtype.Text
-	Scool     pgtype.Text
+	SClass    pgtype.Text
+	School    pgtype.Text
 	OrderDay  pgtype.Int2
 	OrderTime pgtype.Time
 	OrderCost pgtype.Int2
