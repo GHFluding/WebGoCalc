@@ -11,6 +11,44 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const addEventsForDay = `-- name: AddEventsForDay :exec
+INSERT INTO calendar (student_id, event_date, order_time, order_cost)
+SELECT 
+    id AS student_id, 
+    $1::DATE AS event_date, 
+    order_time, 
+    order_cost
+FROM students
+WHERE order_day = $2
+`
+
+type AddEventsForDayParams struct {
+	Column1  pgtype.Date
+	OrderDay pgtype.Int2
+}
+
+func (q *Queries) AddEventsForDay(ctx context.Context, arg AddEventsForDayParams) error {
+	_, err := q.db.Exec(ctx, addEventsForDay, arg.Column1, arg.OrderDay)
+	return err
+}
+
+const addEventsForToday = `-- name: AddEventsForToday :exec
+INSERT INTO calendar (student_id, event_date, order_time, order_cost)
+SELECT 
+    id AS student_id, 
+    CURRENT_DATE AS event_date, 
+    order_time, 
+    order_cost
+FROM students
+WHERE order_day = EXTRACT(DOW FROM CURRENT_DATE)
+`
+
+// auto-add to date, but i'm not sure if it work's
+func (q *Queries) AddEventsForToday(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, addEventsForToday)
+	return err
+}
+
 const createStudent = `-- name: CreateStudent :one
 INSERT INTO students (
   name, s_class, school, order_day, order_time, order_cost
@@ -51,6 +89,26 @@ func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (S
 	return i, err
 }
 
+const deleteEventsByDate = `-- name: DeleteEventsByDate :exec
+DELETE FROM calendar
+WHERE event_date = $1
+`
+
+func (q *Queries) DeleteEventsByDate(ctx context.Context, eventDate pgtype.Date) error {
+	_, err := q.db.Exec(ctx, deleteEventsByDate, eventDate)
+	return err
+}
+
+const deleteEventsByStudent = `-- name: DeleteEventsByStudent :exec
+DELETE FROM calendar
+WHERE student_id = $1
+`
+
+func (q *Queries) DeleteEventsByStudent(ctx context.Context, studentID int64) error {
+	_, err := q.db.Exec(ctx, deleteEventsByStudent, studentID)
+	return err
+}
+
 const deleteStudentByName = `-- name: DeleteStudentByName :exec
 DELETE FROM students 
 WHERE name = $1
@@ -59,6 +117,59 @@ WHERE name = $1
 func (q *Queries) DeleteStudentByName(ctx context.Context, name string) error {
 	_, err := q.db.Exec(ctx, deleteStudentByName, name)
 	return err
+}
+
+const getEventsByDate = `-- name: GetEventsByDate :many
+SELECT 
+    c.id AS calendar_id,
+    s.id AS student_id,
+    s.name AS student_name,
+    c.event_date,
+    c.order_time,
+    c.order_cost,
+    c.order_check
+FROM calendar c
+JOIN students s ON c.student_id = s.id
+WHERE c.event_date = $1
+ORDER BY c.order_time
+`
+
+type GetEventsByDateRow struct {
+	CalendarID  int64
+	StudentID   int64
+	StudentName string
+	EventDate   pgtype.Date
+	OrderTime   pgtype.Time
+	OrderCost   int16
+	OrderCheck  pgtype.Bool
+}
+
+func (q *Queries) GetEventsByDate(ctx context.Context, eventDate pgtype.Date) ([]GetEventsByDateRow, error) {
+	rows, err := q.db.Query(ctx, getEventsByDate, eventDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetEventsByDateRow
+	for rows.Next() {
+		var i GetEventsByDateRow
+		if err := rows.Scan(
+			&i.CalendarID,
+			&i.StudentID,
+			&i.StudentName,
+			&i.EventDate,
+			&i.OrderTime,
+			&i.OrderCost,
+			&i.OrderCheck,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getStudentByName = `-- name: GetStudentByName :one
@@ -113,6 +224,22 @@ func (q *Queries) ListStudents(ctx context.Context) ([]Student, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const markEventAsChecked = `-- name: MarkEventAsChecked :exec
+UPDATE calendar
+SET order_check = TRUE
+WHERE student_id = $1 AND event_date = $2
+`
+
+type MarkEventAsCheckedParams struct {
+	StudentID int64
+	EventDate pgtype.Date
+}
+
+func (q *Queries) MarkEventAsChecked(ctx context.Context, arg MarkEventAsCheckedParams) error {
+	_, err := q.db.Exec(ctx, markEventAsChecked, arg.StudentID, arg.EventDate)
+	return err
 }
 
 const updateStudentByName = `-- name: UpdateStudentByName :exec

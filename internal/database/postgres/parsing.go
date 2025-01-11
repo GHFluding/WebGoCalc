@@ -49,7 +49,7 @@ func parseRequest(c *gin.Context, log *slog.Logger) (request, error) {
 		})
 		return req, err
 	}
-	log.Debug("request data: ", req)
+
 	return req, nil
 }
 

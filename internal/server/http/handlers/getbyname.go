@@ -11,10 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Handler для получения информации о студенте по имени
+
 func GetStudentByNameHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Получение имени студента из параметров запроса
+		// Get name from request
 		studentName := c.Param("name")
 		if studentName == "" {
 			log.Error("Missing student name in request")
@@ -24,7 +24,7 @@ func GetStudentByNameHandler(db postgres.Queries, log *slog.Logger) gin.HandlerF
 			return
 		}
 
-		// Создание контекста и логирование начала запроса
+		// Create context and logs
 		ctx := context.Background()
 		startTime := time.Now()
 		requestID := middleware.RequestIdFromContext(c)
@@ -35,7 +35,7 @@ func GetStudentByNameHandler(db postgres.Queries, log *slog.Logger) gin.HandlerF
 			"studentName", studentName,
 		)
 
-		// Получение данных студента из базы данных
+		// Get data 
 		student, err := db.GetStudentByName(ctx, studentName)
 		if err != nil {
 			log.Error("Failed to retrieve student",
@@ -43,7 +43,7 @@ func GetStudentByNameHandler(db postgres.Queries, log *slog.Logger) gin.HandlerF
 				"error", err.Error(),
 			)
 
-			// Если студент не найден, возвращаем 404
+			// If Student no in db 404
 			if err.Error() == "no rows in result set" {
 				c.JSON(http.StatusNotFound, gin.H{
 					"error": "Student not found",
@@ -51,21 +51,21 @@ func GetStudentByNameHandler(db postgres.Queries, log *slog.Logger) gin.HandlerF
 				return
 			}
 
-			// Другие ошибки
+			// Errors
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Failed to retrieve student",
 			})
 			return
 		}
 
-		// Логируем успешное получение данных
+		// Log
 		log.Info("Successfully retrieved student",
 			"requestId", requestID,
 			"studentId", student.ID,
 			"duration", time.Since(startTime).String(),
 		)
 
-		// Возвращаем данные о студенте
+		// Return
 		c.JSON(http.StatusOK, gin.H{
 			"student": student,
 		})

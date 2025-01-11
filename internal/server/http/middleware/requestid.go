@@ -10,10 +10,10 @@ func RequestIdMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		requestId := c.GetHeader("X-Request-Id")
 		if requestId == "" {
-			requestId = c.GetHeader("RequestId") // generate uniqe id
+			requestId = c.GetHeader("RequestId") // generate uniq id
 		}
 		if requestId == "" {
-			requestId = uuid.New().String() // generate uniqe id
+			requestId = uuid.New().String() // generate uniq id
 		}
 		c.Set("RequestId", requestId) // saved in gin context
 		c.Writer.Header().Set("X-Request-Id", requestId)
