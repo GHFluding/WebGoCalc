@@ -24,7 +24,7 @@ func ListStudentsHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc 
 
 		//use List func sql
 		students, err := db.ListStudents(ctx)
-		//chek errors and log
+		//check errors and log
 		if err != nil {
 			log.Error("Failed to retrieve students",
 				"requestId", requestID,

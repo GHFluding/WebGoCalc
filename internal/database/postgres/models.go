@@ -8,11 +8,20 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Calendar struct {
+	ID         int64
+	StudentID  int64
+	EventDate  pgtype.Date
+	OrderTime  pgtype.Time
+	OrderCost  int16
+	OrderCheck pgtype.Bool
+}
+
 type Student struct {
 	ID        int64
 	Name      string
-	Clas      pgtype.Text
-	Scool     pgtype.Text
+	SClass    pgtype.Text
+	School    pgtype.Text
 	OrderDay  pgtype.Int2
 	OrderTime pgtype.Time
 	OrderCost pgtype.Int2
