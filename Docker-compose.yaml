@@ -8,7 +8,6 @@ services:
       - "8080:8080"
     environment:
       ENV: ${ENV}
-      STORAGE_PATH: ${STORAGE_PATH}
       STORAGE_HOST: ${DB_HOST}
       STORAGE_PORT: ${DB_PORT}
       STORAGE_USER: ${DB_USER}
@@ -22,8 +21,7 @@ services:
     networks:
       - app-network
     volumes:
-    - ./migrations:/app/migrations  
-
+    - ./migrations:/  
 
   postgres:
     image: postgres:17
@@ -35,7 +33,6 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      #- ./migrations:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network

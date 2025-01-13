@@ -27,7 +27,7 @@ func main() {
 
 	//Logger is up
 	log.Info("starting rep_cal", slog.String("env", cfg.Env))
-	log.Debug("debug masseges are enabled")
+	log.Debug("debug massages are enabled")
 
 	// connection to DB
 	dbpool, err := postgres.Connect(*cfg)
