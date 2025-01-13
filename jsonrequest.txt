@@ -1,0 +1,44 @@
+#localhost:8080/
+/studentslist - jsonout{"students": students,}
+    students:
+    ID        int64
+    Name      string
+    Class      pgtype.Text
+    School     pgtype.Text
+    OrderDay  pgtype.Int2
+    OrderTime pgtype.Time
+    OrderCost pgtype.Int2
+/create-student - jsoninp{
+`json:"name" binding:"required" #string
+json:"class" binding:"required" #string
+json:"school" binding:"required" #string
+json:"order_day" binding:"required" #int16
+json:"order_time" binding:"required" # Ожидаем строку в формате времени "15:04"
+json:"order_cost" binding:"required" #int16
+}
+#не добавлено в обработку, но готово
+/getstudent - jsoninp:
+json:"name" binding:"required" #string
+    -jsonout:
+json:"id" #int64
+json:"name" binding:"required" #string
+json:"class" binding:"required" #string
+json:"school" binding:"required" #string
+json:"order_day" binding:"required" #int16
+json:"order_time" binding:"required" # Ожидаем строку в формате времени "15:04"
+json:"order_cost" binding:"required" #int16
+
+/update - jsoninp
+`json:"name" binding:"required" #string
+json:"class" binding:"required" #string
+json:"school" binding:"required" #string
+json:"order_day" binding:"required" #int16
+json:"order_time" binding:"required" # Ожидаем строку в формате времени "15:04"
+json:"order_cost" binding:"required" #int16
+out
+"message": "Student updated successfully",
+
+/delete - jsoninp
+json:"name" binding:"required" #string
+out 
+"message": "Student successfully deleted",
