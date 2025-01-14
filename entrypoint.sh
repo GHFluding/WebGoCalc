@@ -1,11 +1,11 @@
 #!/bin/bash
-# entrypoint.sh
 
+echo "Waiting for PostgreSQL to be ready..."
 
-# Выполняем миграции
-echo "Running migrations..."
-migrate -path=/app/migrations -database "postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME?sslmode=disable" up
+# wait postgres database creating
+/wait-for-it.sh $DB_HOST:$DB_PORT --timeout=30 --strict -- echo "PostgreSQL is up and ready"
+echo "PostgreSQL container is ready."
 
-# После выполнения миграций запускаем приложение
+# start app
 echo "Starting the app..."
 exec "$@"
