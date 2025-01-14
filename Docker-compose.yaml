@@ -1,4 +1,23 @@
 services:
+ 
+
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres   # Указание нестандартного имени Dockerfile
+    container_name: webgocalc_postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+
   app:
     build:
       context: .
@@ -8,7 +27,6 @@ services:
       - "8080:8080"
     environment:
       ENV: ${ENV}
-      STORAGE_PATH: ${STORAGE_PATH}
       STORAGE_HOST: ${DB_HOST}
       STORAGE_PORT: ${DB_PORT}
       STORAGE_USER: ${DB_USER}
@@ -22,24 +40,8 @@ services:
     networks:
       - app-network
     volumes:
-    - ./migrations:/app/migrations  
-
-
-  postgres:
-    image: postgres:17
-    container_name: webgocalc_postgres
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "5432:5432"
-    volumes:
-      #- ./migrations:/docker-entrypoint-initdb.d
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - app-network
-
+    - ./migrations:/migrations
+    
 volumes:
   postgres_data:
 
