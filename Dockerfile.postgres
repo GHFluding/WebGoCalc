@@ -9,5 +9,3 @@ COPY init-scripts/ /docker-entrypoint-initdb.d/
 
 # Делаем файлы исполняемыми (на всякий случай, если есть shell-скрипты)
 RUN chmod -R +x /docker-entrypoint-initdb.d/
-
-CMD ["docker-entrypoint-initdb.d"]

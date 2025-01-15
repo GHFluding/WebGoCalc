@@ -7,9 +7,10 @@ RUN apk update && apk add --no-cache git wget bash
 RUN wget -qO- https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz \
     && mv migrate /usr/local/bin/
 
-WORKDIR /api/backend
+WORKDIR /app
 
 ENV GOPROXY=direct
+COPY ./migrations /app/migrations
 
 COPY go.mod go.sum ./
 RUN go mod download
@@ -19,9 +20,7 @@ COPY . .
 
 RUN go build -o main ./cmd/apk/main.go
 
-# copy scripts and run
-COPY wait-for-it.sh /wait-for-it.sh
-RUN chmod +x /wait-for-it.sh
+# copy scripts and ru
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
@@ -38,13 +37,12 @@ FROM alpine:latest
 RUN apk update && apk add --no-cache bash libpq
 
 # Копируем исполнимая программа и другие необходимые файлы
-COPY --from=builder /api/backend/main /main
-COPY --from=builder /wait-for-it.sh /wait-for-it.sh
+COPY --from=builder /app/main /main
 COPY --from=builder /entrypoint.sh /entrypoint.sh
-COPY --from=builder /api/backend/.env /.env
-
+COPY --from=builder /app/.env /.env
+COPY --from=builder /app/migrations /app/migrations
 # Делаем скрипты исполнимыми
-RUN chmod +x /wait-for-it.sh /entrypoint.sh
+RUN chmod +x  /entrypoint.sh
 
 # Устанавливаем рабочую директорию
 WORKDIR /
