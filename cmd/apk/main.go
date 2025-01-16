@@ -70,9 +70,22 @@ func main() {
 	r.Use(middleware.RequestIdMiddleware())
 	r.Use(sl.LoggingMiddleware(log)) //all loggers in package sl
 	r.Use(middleware.RecoveryMiddleware(log))
-	r.GET("/studentslist", handler.ListStudentsHandler(*queries, log))
-	r.POST("/create-student", handler.CreateStudentHandler(*queries, log))
 
+	//router group for work with table students
+	studentGroup := r.Group("/api/students")
+	{
+		studentGroup.GET("/list", handler.ListStudentsHandler(*queries, log))
+		studentGroup.POST("/create", handler.CreateStudentHandler(*queries, log))
+		studentGroup.POST("/delete", handler.DeleteStudentByNameHandler(*queries, log))
+		studentGroup.POST("/get", handler.GetStudentByNameHandler(*queries, log))
+		studentGroup.POST("/update", handler.UpdateStudentByNameHandler(*queries, log))
+	}
+
+	//router group for work with table calendar
+	calendarGroup := r.Group("/api/calendar")
+	{
+		calendarGroup.GET("/daylist", handler.DayListHandler(*queries, log))
+	}
 	r.Run(cfg.HTTPServer.Address)
 	//TODO: init controllers
 
