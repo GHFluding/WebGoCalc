@@ -1,33 +1,45 @@
+
 services:
- 
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: webgocalc_nginx
+    ports:
+      - "80:80" # Порт для внешнего доступа
+    volumes:
+      - './nginx/nginx.conf:/etc/nginx/nginx.conf:ro' # Проксирование запросов
+    networks:
+      - app-network # Общая сеть с backend
+    depends_on:
+      - backend
 
   postgres:
-    build:
-      context: .
-      dockerfile: Dockerfile.postgres   # Указание нестандартного имени Dockerfile
+    image: postgres:17
     container_name: webgocalc_postgres
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    # Убрано "ports", чтобы PostgreSQL был доступен только из Docker Compose сети
 
-  app:
+  backend:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: webgocalc_app
-    ports:
-      - "8080:8080"
     environment:
       ENV: ${ENV}
-      STORAGE_HOST: ${DB_HOST}
+      STORAGE_HOST: webgocalc_postgres # PostgreSQL доступен через сеть
       STORAGE_PORT: ${DB_PORT}
       STORAGE_USER: ${DB_USER}
       STORAGE_PASSWORD: ${DB_PASSWORD}
@@ -36,12 +48,11 @@ services:
       HTTP_SERVER_TIMEOUT: ${HTTP_SERVER_TIMEOUT}
       HTTP_SERVER_IDLE_TIMEOUT: ${HTTP_SERVER_IDLE_TIMEOUT}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - app-network
-    volumes:
-    - ./migrations:/migrations
-    
+
 volumes:
   postgres_data:
 

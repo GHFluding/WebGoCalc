@@ -70,8 +70,42 @@ func main() {
 	r.Use(middleware.RequestIdMiddleware())
 	r.Use(sl.LoggingMiddleware(log)) //all loggers in package sl
 	r.Use(middleware.RecoveryMiddleware(log))
-	r.GET("/studentslist", handler.ListStudentsHandler(*queries, log))
-	r.POST("/create-student", handler.CreateStudentHandler(*queries, log))
+
+	//router group for work with table students
+	// Group for working with student-related routes
+	studentGroup := r.Group("/api/students")
+	{
+		// Get a list of all students
+		// Example: GET /api/students
+		studentGroup.GET("/", handler.ListStudentsHandler(*queries, log))
+
+		// Create a new student
+		// Example: POST /api/students
+		// Request Body: {"name": "John Doe", "age": 20, ...}
+		studentGroup.POST("/", handler.CreateStudentHandler(*queries, log))
+
+		// Delete a student by name
+		// Example: DELETE /api/students/JohnDoe
+		studentGroup.DELETE("/:name", handler.DeleteStudentByNameHandler(*queries, log))
+
+		// Get details of a specific student by name
+		// Example: GET /api/students/JohnDoe
+		studentGroup.GET("/:name", handler.GetStudentByNameHandler(*queries, log))
+
+		// Update specific details of a student by name
+		// Example: PATCH /api/students/JohnDoe
+		// Request Body: {"age": 21, ...}
+		studentGroup.PATCH("/:name", handler.UpdateStudentByNameHandler(*queries, log))
+	}
+
+	// Group for working with calendar-related routes
+	calendarGroup := r.Group("/api/calendar")
+	{
+		// Get the list of events or schedules for a specific day
+		// Example: GET /api/calendar
+		// Query Parameters: ?date=2025-01-17
+		calendarGroup.GET("/", handler.DayListHandler(*queries, log))
+	}
 
 	r.Run(cfg.HTTPServer.Address)
 	//TODO: init controllers
