@@ -1,11 +1,11 @@
--- name: GetStudentByName :one
+-- name: GetStudentById :one
 SELECT * FROM students 
-WHERE name = $1 
+WHERE id = $1 
 LIMIT 1;
 
 -- name: ListStudents :many
 SELECT * FROM students
-ORDER BY name;
+ORDER BY id; 
 
 -- name: CreateStudent :one
 INSERT INTO students (
@@ -15,19 +15,20 @@ INSERT INTO students (
 )
 RETURNING *;
 
--- name: UpdateStudentByName :exec
+-- name: UpdateStudentById :exec
 UPDATE students
 SET 
-  s_class = $2,
-  school = $3,
-  order_day = $4,
-  order_time = $5,
-  order_cost = $6
-WHERE name = $1;
+  name = $2,
+  s_class = $3,
+  school = $4,
+  order_day = $5,
+  order_time = $6,
+  order_cost = $7
+WHERE id = $1;
 
--- name: DeleteStudentByName :exec
+-- name: DeleteStudentById :exec
 DELETE FROM students 
-WHERE name = $1;
+WHERE id = $1;
 
 -- name: GetEventsByDate :many
 SELECT 
@@ -51,7 +52,9 @@ SELECT
     order_time, 
     order_cost
 FROM students
-WHERE order_day = $2;
+WHERE order_day = CASE 
+    WHEN $2 = 0 THEN 7  
+END;
 
 -- name: DeleteEventsByDate :exec
 DELETE FROM calendar
@@ -66,8 +69,6 @@ UPDATE calendar
 SET order_check = TRUE
 WHERE student_id = $1 AND event_date = $2;
 
-
---auto-add to date, but i'm not sure if it work's
 -- name: AddEventsForToday :exec
 INSERT INTO calendar (student_id, event_date, order_time, order_cost)
 SELECT 
@@ -76,4 +77,7 @@ SELECT
     order_time, 
     order_cost
 FROM students
-WHERE order_day = EXTRACT(DOW FROM CURRENT_DATE);
+WHERE order_day = CASE 
+    WHEN EXTRACT(DOW FROM CURRENT_DATE) = 0 THEN 7 
+    ELSE EXTRACT(DOW FROM CURRENT_DATE)
+END;

@@ -11,8 +11,8 @@ import (
 )
 
 type request struct {
-	ID        int64  `json:"id" `
-	Name      string `json:"name" binding:"required"`
+	ID        int64  `json:"id"`
+	Name      string `json:"name" `
 	Class     string `json:"class"`
 	School    string `json:"school"`
 	OrderDay  int16  `json:"order_day"`
@@ -21,7 +21,11 @@ type request struct {
 }
 
 // check empty fields in struct
-func setDefaultValuesManually(req *request, student *Student, arg *UpdateStudentByNameParams) {
+func setDefaultValuesManually(req *request, student *Student, arg *UpdateStudentByIdParams) {
+
+	if req.Name == "" {
+		arg.Name = student.Name
+	}
 	if req.Class == "" {
 		arg.SClass = student.SClass
 	}
@@ -104,12 +108,13 @@ func UpdateStudentData(db Queries, c *gin.Context, log *slog.Logger) (string, er
 		return "Invalid request payload", err
 	}
 	ctx := context.Background()
-	student, ok := db.GetStudentByName(ctx, req.Name)
+	student, ok := db.GetStudentById(ctx, req.ID)
 	pgTime, err := parseTime(c, &req, log)
 	if err != nil {
 		return "Invalid time format", err
 	}
-	arg := UpdateStudentByNameParams{
+	arg := UpdateStudentByIdParams{
+		ID:        req.ID,
 		Name:      req.Name,
 		SClass:    pgtype.Text{String: req.Class, Valid: true},
 		School:    pgtype.Text{String: req.School, Valid: true},
@@ -121,7 +126,7 @@ func UpdateStudentData(db Queries, c *gin.Context, log *slog.Logger) (string, er
 		setDefaultValuesManually(&req, &student, &arg)
 	}
 	ctx = context.Background()
-	err = db.UpdateStudentByName(ctx, arg)
+	err = db.UpdateStudentById(ctx, arg)
 	if err != nil {
 		return "Failed to update student", err
 	}

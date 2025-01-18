@@ -11,33 +11,41 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Handler for create new student in db
+// Handler for creating a new student in the DB
 func CreateStudentHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Start the request timer
 		startTime := time.Now()
 		requestID := middleware.RequestIdFromContext(c)
-		log.Info("Handling CreateStudent request",
-			"requestId", requestID,
-			"url", c.Request.URL.Path,
-			"method", c.Request.Method,
-		)
-		//request for db
+
+		// Log the start of the request
+		extraFields := map[string]interface{}{
+			"requestId": requestID,
+			"url":       c.Request.URL.Path,
+			"method":    c.Request.Method,
+		}
+		sl.LogRequestInfo(log, "info", c, "Handling CreateStudent request", nil, extraFields)
+
+		// Request for db
 		s, student, err := postgres.CreateStudentData(db, c, log)
-		//errors
+
+		// Handle errors
 		if err != nil {
-			log.Error(s, "error", sl.Err(err))
+			extraFields["string"] = s
+			extraFields["error"] = err.Error()
+			sl.LogRequestInfo(log, "error", c, "Failed to create student", err, extraFields)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
 			return
 		}
-		//log request
-		log.Info(s,
-			"requestId", requestID,
-			"studentId", student.ID,
-			"duration", time.Since(startTime).String(),
-		)
-		// return result to user
+
+		// Log successful creation
+		extraFields["studentId"] = student.ID
+		extraFields["duration"] = time.Since(startTime).String()
+		sl.LogRequestInfo(log, "info", c, "Successfully created student", nil, extraFields)
+
+		// Return result to user
 		c.JSON(http.StatusOK, gin.H{
 			"student": student,
 		})

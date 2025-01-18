@@ -86,16 +86,16 @@ func main() {
 
 		// Delete a student by name
 		// Example: DELETE /api/students/JohnDoe
-		studentGroup.DELETE("/:name", handler.DeleteStudentByNameHandler(*queries, log))
+		studentGroup.DELETE("/:id", handler.DeleteStudentByIdHandler(*queries, log))
 
 		// Get details of a specific student by name
 		// Example: GET /api/students/JohnDoe
-		studentGroup.GET("/:name", handler.GetStudentByNameHandler(*queries, log))
+		studentGroup.GET("/:id", handler.GetStudentByIdHandler(*queries, log))
 
 		// Update specific details of a student by name
 		// Example: PATCH /api/students/JohnDoe
 		// Request Body: {"age": 21, ...}
-		studentGroup.PATCH("/:name", handler.UpdateStudentByNameHandler(*queries, log))
+		studentGroup.PATCH("/:id", handler.UpdateStudentByIdHandler(*queries, log))
 	}
 
 	// Group for working with calendar-related routes

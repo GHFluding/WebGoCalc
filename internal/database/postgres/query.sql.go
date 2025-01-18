@@ -19,16 +19,19 @@ SELECT
     order_time, 
     order_cost
 FROM students
-WHERE order_day = $2
+WHERE order_day = CASE 
+    WHEN $2 = 0 THEN 7  -- Преобразование воскресенья
+    ELSE $2
+END
 `
 
 type AddEventsForDayParams struct {
-	Column1  pgtype.Date
-	OrderDay pgtype.Int2
+	Column1 pgtype.Date
+	Column2 interface{}
 }
 
 func (q *Queries) AddEventsForDay(ctx context.Context, arg AddEventsForDayParams) error {
-	_, err := q.db.Exec(ctx, addEventsForDay, arg.Column1, arg.OrderDay)
+	_, err := q.db.Exec(ctx, addEventsForDay, arg.Column1, arg.Column2)
 	return err
 }
 
@@ -40,16 +43,19 @@ SELECT
     order_time, 
     order_cost
 FROM students
-WHERE order_day = EXTRACT(DOW FROM CURRENT_DATE)
+WHERE order_day = CASE 
+    WHEN EXTRACT(DOW FROM CURRENT_DATE) = 0 THEN 7  -- Преобразование воскресенья
+    ELSE EXTRACT(DOW FROM CURRENT_DATE)
+END
 `
 
-// auto-add to date, but i'm not sure if it work's
 func (q *Queries) AddEventsForToday(ctx context.Context) error {
 	_, err := q.db.Exec(ctx, addEventsForToday)
 	return err
 }
 
 const createStudent = `-- name: CreateStudent :one
+
 INSERT INTO students (
   name, s_class, school, order_day, order_time, order_cost
 ) VALUES (
@@ -67,6 +73,7 @@ type CreateStudentParams struct {
 	OrderCost pgtype.Int2
 }
 
+// Сортировка по id вместо name
 func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (Student, error) {
 	row := q.db.QueryRow(ctx, createStudent,
 		arg.Name,
@@ -109,13 +116,13 @@ func (q *Queries) DeleteEventsByStudent(ctx context.Context, studentID int64) er
 	return err
 }
 
-const deleteStudentByName = `-- name: DeleteStudentByName :exec
+const deleteStudentById = `-- name: DeleteStudentById :exec
 DELETE FROM students 
-WHERE name = $1
+WHERE id = $1
 `
 
-func (q *Queries) DeleteStudentByName(ctx context.Context, name string) error {
-	_, err := q.db.Exec(ctx, deleteStudentByName, name)
+func (q *Queries) DeleteStudentById(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteStudentById, id)
 	return err
 }
 
@@ -172,14 +179,14 @@ func (q *Queries) GetEventsByDate(ctx context.Context, eventDate pgtype.Date) ([
 	return items, nil
 }
 
-const getStudentByName = `-- name: GetStudentByName :one
+const getStudentById = `-- name: GetStudentById :one
 SELECT id, name, s_class, school, order_day, order_time, order_cost FROM students 
-WHERE name = $1 
+WHERE id = $1 
 LIMIT 1
 `
 
-func (q *Queries) GetStudentByName(ctx context.Context, name string) (Student, error) {
-	row := q.db.QueryRow(ctx, getStudentByName, name)
+func (q *Queries) GetStudentById(ctx context.Context, id int64) (Student, error) {
+	row := q.db.QueryRow(ctx, getStudentById, id)
 	var i Student
 	err := row.Scan(
 		&i.ID,
@@ -195,7 +202,7 @@ func (q *Queries) GetStudentByName(ctx context.Context, name string) (Student, e
 
 const listStudents = `-- name: ListStudents :many
 SELECT id, name, s_class, school, order_day, order_time, order_cost FROM students
-ORDER BY name
+ORDER BY id
 `
 
 func (q *Queries) ListStudents(ctx context.Context) ([]Student, error) {
@@ -242,18 +249,20 @@ func (q *Queries) MarkEventAsChecked(ctx context.Context, arg MarkEventAsChecked
 	return err
 }
 
-const updateStudentByName = `-- name: UpdateStudentByName :exec
+const updateStudentById = `-- name: UpdateStudentById :exec
 UPDATE students
 SET 
-  s_class = $2,
-  school = $3,
-  order_day = $4,
-  order_time = $5,
-  order_cost = $6
-WHERE name = $1
+  name = $2,
+  s_class = $3,
+  school = $4,
+  order_day = $5,
+  order_time = $6,
+  order_cost = $7
+WHERE id = $1
 `
 
-type UpdateStudentByNameParams struct {
+type UpdateStudentByIdParams struct {
+	ID        int64
 	Name      string
 	SClass    pgtype.Text
 	School    pgtype.Text
@@ -262,8 +271,9 @@ type UpdateStudentByNameParams struct {
 	OrderCost pgtype.Int2
 }
 
-func (q *Queries) UpdateStudentByName(ctx context.Context, arg UpdateStudentByNameParams) error {
-	_, err := q.db.Exec(ctx, updateStudentByName,
+func (q *Queries) UpdateStudentById(ctx context.Context, arg UpdateStudentByIdParams) error {
+	_, err := q.db.Exec(ctx, updateStudentById,
+		arg.ID,
 		arg.Name,
 		arg.SClass,
 		arg.School,
