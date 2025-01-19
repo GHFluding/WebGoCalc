@@ -10,6 +10,43 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// типы для swagger
+type StudentSwagger struct {
+	ID        int64
+	Name      string
+	SClass    string
+	School    string
+	OrderDay  int
+	OrderTime string
+	OrderCost string
+}
+type EventSwagger struct {
+	CalendarID  int64
+	StudentID   int64
+	StudentName string
+	EventDate   string
+	OrderTime   string
+	OrderCost   int16
+	OrderCheck  bool
+}
+type CreateStudentSwagger struct {
+	Name      string
+	SClass    string
+	School    string
+	OrderDay  int
+	OrderTime string
+	OrderCost int
+}
+type UpdateStudentParams struct {
+	ID        int64
+	Name      string
+	SClass    pgtype.Text
+	School    pgtype.Text
+	OrderDay  pgtype.Int2
+	OrderTime pgtype.Time
+	OrderCost pgtype.Int2
+}
+
 type request struct {
 	ID        int64  `json:"id"`
 	Name      string `json:"name" `

@@ -13,7 +13,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Handler for deleting a student by ID
+// DeleteStudentByIdHandler удаляет студента по ID.
+// @Summary      Удалить студента
+// @Description  Удаляет студента из базы данных по его ID.
+// @Tags         students
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "ID студента"
+// @Success      204
+// @Failure      400  {object}  map[string]interface{} "неверные данные"
+// @Failure      404  {object}  map[string]interface{} "нет такого id"
+// @Router       /api/students/{id} [delete]
+
 func DeleteStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Retrieve student ID from request parameters

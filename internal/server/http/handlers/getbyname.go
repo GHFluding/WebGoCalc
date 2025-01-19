@@ -13,6 +13,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetStudentByIdHandler возвращает информацию о студенте по ID.
+// @Summary      Получить информацию о студенте
+// @Description  Возвращает полную информацию о студенте по его ID.
+// @Tags         students
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "ID студента"
+// @Success      200  {object}  postgres.StudentSwagger
+// @Failure      400  {object}  map[string]interface{} "неверные данные"
+// @Failure      404  {object}  map[string]interface{} "нет такого id"
+// @Router       /api/students/{id} [get]
+
 func GetStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Retrieve student ID from the request parameters

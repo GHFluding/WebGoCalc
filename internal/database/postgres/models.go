@@ -5,6 +5,8 @@
 package postgres
 
 import (
+	"time"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -26,3 +28,4 @@ type Student struct {
 	OrderTime pgtype.Time
 	OrderCost pgtype.Int2
 }
+

@@ -1,10 +1,60 @@
-basePath: /
+basePath: /api
+definitions:
+  postgres.CreateStudentParams:
+    properties:
+      name:
+        type: string
+      orderCost:
+        type: integer
+      orderDay:
+        type: integer
+      orderTime:
+        type: string
+      school:
+        type: string
+      sclass:
+        type: string
+    type: object
+  postgres.EventSwagger:
+    properties:
+      calendarID:
+        type: integer
+      eventDate:
+        type: string
+      orderCheck:
+        type: boolean
+      orderCost:
+        type: integer
+      orderTime:
+        type: string
+      studentID:
+        type: integer
+      studentName:
+        type: string
+    type: object
+  postgres.Student:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      orderCost:
+        type: string
+      orderDay:
+        type: integer
+      orderTime:
+        type: string
+      school:
+        type: string
+      sclass:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
-    email: support@example.com
+    email: --
     name: API Support
-    url: http://www.example.com/support
+    url: --
   description: API для управления студентами и событиями в календаре.
   license:
     name: MIT
@@ -12,5 +62,87 @@ info:
   termsOfService: http://example.com/terms/
   title: Student and Calendar API
   version: "1.0"
-paths: {}
+paths:
+  /api/calendar:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает события календаря на указанный день.
+      parameters:
+      - description: Дата в формате YYYY-MM-DD
+        in: query
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/postgres.EventSwagger'
+            type: array
+        "400":
+          description: неверные данные
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получить список событий
+      tags:
+      - calendar
+  /api/students:
+    get:
+      description: Получить все записи студентов
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список студентов
+          schema:
+            items:
+              $ref: '#/definitions/postgres.Student'
+            type: array
+        "500":
+          description: Ошибка сервера" // Используем map[string]interface{} для gin.H
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получить список студентов
+    post:
+      consumes:
+      - application/json
+      description: Добавляет нового студента в базу данных.
+      parameters:
+      - description: Данные студента
+        in: body
+        name: student
+        required: true
+        schema:
+          $ref: '#/definitions/postgres.CreateStudentParams'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/postgres.Student'
+        "400":
+          description: неверные данные
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Создать студента
+      tags:
+      - students
 swagger: "2.0"

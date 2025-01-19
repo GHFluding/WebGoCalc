@@ -11,6 +11,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// UpdateStudentByIdHandler обновляет информацию о студенте по ID.
+// @Summary      Обновить информацию о студенте
+// @Description  Позволяет обновить определенные данные студента по его ID.
+// @Tags         students
+// @Accept       json
+// @Produce      json
+// @Param        id      path      int                          true  "ID студента"
+// @Param        student body      postgres.UpdateStudentParams true  "Данные для обновления"
+// @Success      200     {object}  postgres.StudentSwagger
+// @Failure      400  {object}  map[string]interface{} "неверные данные"
+// @Failure      404  {object}  map[string]interface{} "нет такого id"
+// @Router       /api/students/{id} [patch]
+
 func UpdateStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Parse the request JSON into a struct (this assumes your request body is properly structured)

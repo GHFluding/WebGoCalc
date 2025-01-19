@@ -14,7 +14,17 @@ import (
 	sl "test/internal/services/slogger"
 )
 
-// Handler for fetching the list of students for the current date
+// DayListHandler возвращает список событий на день.
+// @Summary      Получить список событий
+// @Description  Возвращает события календаря на указанный день.
+// @Tags         calendar
+// @Accept       json
+// @Produce      json
+// @Param        date  query  string  true  "Дата в формате YYYY-MM-DD"
+// @Success      200  {array}  postgres.EventSwagger
+// @Failure      400  {object}  map[string]interface{} "неверные данные"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Router       /api/calendar [get]
 func DayListHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 

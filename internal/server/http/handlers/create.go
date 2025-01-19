@@ -11,7 +11,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Handler for creating a new student in the DB
+// CreateStudentHandler создает нового студента.
+// @Summary      Создать студента
+// @Description  Добавляет нового студента в базу данных.
+// @Tags         students
+// @Accept       json
+// @Produce      json
+// @Param        student  body  postgres.CreateStudentSwagger  true  "Данные студента"
+// @Success      201  {object}  postgres.StudentSwagger
+// @Failure      400  {object}  map[string]interface{} "неверные данные"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Router       /api/students [post]
 func CreateStudentHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Start the request timer

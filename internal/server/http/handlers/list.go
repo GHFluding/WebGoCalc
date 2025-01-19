@@ -12,6 +12,13 @@ import (
 	sl "test/internal/services/slogger"
 )
 
+// ListStudentsHandler - Обработчик для получения списка студентов
+// @Summary Получить список студентов
+// @Description Получить все записи студентов
+// @Produce json
+// @Success 200 {array} postgres.StudentSwagger "Список студентов"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Router /api/students [get]
 func ListStudentsHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Start the request timer
