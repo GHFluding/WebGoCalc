@@ -11,34 +11,68 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UpdateStudentByNameHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
+// UpdateStudentByIdHandler обновляет информацию о студенте по ID.
+// @Summary      Обновить информацию о студенте
+// @Description  Позволяет обновить определенные данные студента по его ID.
+// @Tags         students
+// @Accept       json
+// @Produce      json
+// @Param        id      path      int                          true  "ID студента"
+// @Param        student body      postgres.UpdateStudentParams true  "Данные для обновления"
+// @Success      200     {object}  postgres.StudentSwagger
+// @Failure      400  {object}  map[string]interface{} "неверные данные"
+// @Failure      404  {object}  map[string]interface{} "нет такого id"
+// @Router       /api/students/{id} [patch]
+
+func UpdateStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		name := `json:"name"`
+		// Parse the request JSON into a struct (this assumes your request body is properly structured)
+		var req struct {
+			Name string `json:"name"`
+		}
+
+		// Start the timer for request duration
 		startTime := time.Now()
+
+		// Extract the request ID for correlation
 		requestID := middleware.RequestIdFromContext(c)
-		log.Info("Handling UpdateStudents request",
-			"requestId", requestID,
-			"url", c.Request.URL.Path,
-			"method", c.Request.Method,
-		)
-		//request for db
+
+		// Log the incoming request with essential details
+		extraFields := map[string]interface{}{
+			"requestId": requestID,
+			"url":       c.Request.URL.Path,
+			"method":    c.Request.Method,
+		}
+		sl.LogRequestInfo(log, "info", c, "Handling UpdateStudent request", nil, extraFields)
+
+		// Bind JSON from the request body to the struct
+		if err := c.ShouldBindJSON(&req); err != nil {
+			sl.LogRequestInfo(log, "error", c, "Failed to bind request data", err, extraFields)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Invalid request payload",
+			})
+			return
+		}
+
+		// Call the database function to update the student data
 		s, err := postgres.UpdateStudentData(db, c, log)
-		//errors
 		if err != nil {
-			log.Error(s, "error", sl.Err(err))
+			// Log the error and return a failure response
+			extraFields["string"] = s //more massage with error
+			extraFields["error"] = err.Error()
+			sl.LogRequestInfo(log, "error", c, "Failed to update student", err, extraFields)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
 			return
 		}
-		//log request
-		log.Info("Successfully updated student",
-			"requestId", requestID,
-			"name", name,
-			"duration", time.Since(startTime).String(),
-		)
 
-		// return
+		// Log successful student update, include duration
+		extraFields["name"] = req.Name
+		extraFields["duration"] = time.Since(startTime).String()
+		sl.LogRequestInfo(log, "info", c, "Successfully updated student", nil, extraFields)
+
+		// Return the success response
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Student updated successfully",
 		})

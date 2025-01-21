@@ -1,5 +1,5 @@
 #!/bin/bash
 
-# Запускаем приложение
+#  Run app
 echo "Starting the app..."
 exec "$@"

@@ -11,12 +11,30 @@ import (
 	// setup logger
 	sl "test/internal/services/slogger"
 
-	"github.com/gin-gonic/gin"
+	_ "test/docs"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+// @title           Student and Calendar API
+// @version         1.0
+// @description     API для управления студентами и событиями в календаре.
+// @termsOfService  http://example.com/terms/
+
+// @contact.name   API Support
+// @contact.url   --
+// @contact.email  --
+
+// @license.name  MIT
+// @license.url   https://opensource.org/licenses/MIT
+
+// @host      localhost:8080
+// @BasePath  /api
 
 func main() {
 	//init config: env
@@ -75,38 +93,26 @@ func main() {
 	// Group for working with student-related routes
 	studentGroup := r.Group("/api/students")
 	{
-		// Get a list of all students
-		// Example: GET /api/students
+
 		studentGroup.GET("/", handler.ListStudentsHandler(*queries, log))
 
-		// Create a new student
-		// Example: POST /api/students
-		// Request Body: {"name": "John Doe", "age": 20, ...}
 		studentGroup.POST("/", handler.CreateStudentHandler(*queries, log))
 
-		// Delete a student by name
-		// Example: DELETE /api/students/JohnDoe
-		studentGroup.DELETE("/:name", handler.DeleteStudentByNameHandler(*queries, log))
+		studentGroup.DELETE("/:id", handler.DeleteStudentByIdHandler(*queries, log))
 
-		// Get details of a specific student by name
-		// Example: GET /api/students/JohnDoe
-		studentGroup.GET("/:name", handler.GetStudentByNameHandler(*queries, log))
+		studentGroup.GET("/:id", handler.GetStudentByIdHandler(*queries, log))
 
-		// Update specific details of a student by name
-		// Example: PATCH /api/students/JohnDoe
-		// Request Body: {"age": 21, ...}
-		studentGroup.PATCH("/:name", handler.UpdateStudentByNameHandler(*queries, log))
+		studentGroup.PATCH("/:id", handler.UpdateStudentByIdHandler(*queries, log))
 	}
 
 	// Group for working with calendar-related routes
 	calendarGroup := r.Group("/api/calendar")
 	{
-		// Get the list of events or schedules for a specific day
-		// Example: GET /api/calendar
-		// Query Parameters: ?date=2025-01-17
+
 		calendarGroup.GET("/", handler.DayListHandler(*queries, log))
 	}
 
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Run(cfg.HTTPServer.Address)
 	//TODO: init controllers
 

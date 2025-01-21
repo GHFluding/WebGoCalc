@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"log/slog"
 	"net/http"
 	"test/internal/database/postgres"
@@ -9,38 +8,55 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
+	sl "test/internal/services/slogger"
 )
 
+// ListStudentsHandler - Обработчик для получения списка студентов
+// @Summary Получить список студентов
+// @Description Получить все записи студентов
+// @Produce json
+// @Success 200 {array} postgres.StudentSwagger "Список студентов"
+// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
+// @Router /api/students [get]
 func ListStudentsHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx := context.Background()
+		// Start the request timer
 		startTime := time.Now()
-		requestID := middleware.RequestIdFromContext(c)
-		log.Info("Handling ListStudents request",
-			"requestId", requestID,
-			"url", c.Request.URL.Path,
-			"method", c.Request.Method,
-		)
 
-		//use List func sql
-		students, err := db.ListStudents(ctx)
-		//check errors and log
+		// Retrieve request ID for correlation
+		requestID := middleware.RequestIdFromContext(c)
+
+		// Prepare fields for logging
+		extraFields := map[string]interface{}{
+			"requestId": requestID,
+			"url":       c.Request.URL.Path,
+			"method":    c.Request.Method,
+		}
+
+		// Log the incoming request
+		sl.LogRequestInfo(log, "info", c, "Handling ListStudents request", nil, extraFields)
+
+		// Fetch the list of students from the database
+		students, err := db.ListStudents(c.Request.Context())
 		if err != nil {
-			log.Error("Failed to retrieve students",
-				"requestId", requestID,
-				"error", err.Error(),
-			)
+			// Log the error if fetching students fails
+			extraFields["error"] = err.Error()
+			sl.LogRequestInfo(log, "error", c, "Failed to retrieve students", err, extraFields)
+
+			// Return error response to the client
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Failed to retrieve students",
 			})
 			return
 		}
-		// return data
-		log.Info("Successfully retrieved students",
-			"requestId", requestID,
-			"count", len(students),
-			"duration", time.Since(startTime).String(),
-		)
+
+		// Log success after retrieving students
+		extraFields["count"] = len(students)
+		extraFields["duration"] = time.Since(startTime).String()
+		sl.LogRequestInfo(log, "info", c, "Successfully retrieved students", nil, extraFields)
+
+		// Return the list of students as a response
 		c.JSON(http.StatusOK, gin.H{
 			"students": students,
 		})

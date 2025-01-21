@@ -4,57 +4,87 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"test/internal/database/postgres"
 	"test/internal/server/http/middleware"
+	sl "test/internal/services/slogger"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-func DeleteStudentByNameHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
+// DeleteStudentByIdHandler удаляет студента по ID.
+// @Summary      Удалить студента
+// @Description  Удаляет студента из базы данных по его ID.
+// @Tags         students
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "ID студента"
+// @Success      204
+// @Failure      400  {object}  map[string]interface{} "неверные данные"
+// @Failure      404  {object}  map[string]interface{} "нет такого id"
+// @Router       /api/students/{id} [delete]
+
+func DeleteStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Getting name from request
-		studentName := c.Param("name")
-		if studentName == "" {
-			log.Error("Missing student name in request")
+		// Retrieve student ID from request parameters
+		studentIDParam := c.Param("id")
+		if studentIDParam == "" {
+			// Log error if student ID is missing
+			sl.LogRequestInfo(log, "error", c, "Missing student ID in request", nil, nil)
+
+			// Return error response
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Student name is required",
+				"error": "Student ID is required",
 			})
 			return
 		}
 
-		// create context and log start of request
-		ctx := context.Background()
+		// Convert the student ID from string to int64
+		studentID, err := strconv.ParseInt(studentIDParam, 10, 64)
+		if err != nil {
+			// Log error if student ID format is invalid
+			sl.LogRequestInfo(log, "error", c, "Invalid student ID format", err, map[string]interface{}{
+				"studentIDParam": studentIDParam,
+			})
+
+			// Return error response
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Invalid student ID format",
+			})
+			return
+		}
+
+		// Create context and log the start of the request
 		startTime := time.Now()
 		requestID := middleware.RequestIdFromContext(c)
-		log.Info("Handling DeleteStudentByName request",
-			"requestId", requestID,
-			"url", c.Request.URL.Path,
-			"method", c.Request.Method,
-			"studentName", studentName,
-		)
+		extraFields := map[string]interface{}{
+			"requestId": requestID,
+			"url":       c.Request.URL.Path,
+			"method":    c.Request.Method,
+			"studentID": studentID,
+		}
+		sl.LogRequestInfo(log, "info", c, "Handling DeleteStudentById request", nil, extraFields)
 
-		// delete in db
-		err := db.DeleteStudentByName(ctx, studentName)
+		// Attempt to delete the student from the database
+		err = db.DeleteStudentById(context.Background(), studentID)
 		if err != nil {
-			log.Error("Failed to delete student",
-				"requestId", requestID,
-				"error", err.Error(),
-			)
+			// Log the error if deleting the student fails
+			extraFields["error"] = err.Error()
+			sl.LogRequestInfo(log, "error", c, "Failed to delete student", err, extraFields)
+
+			// Return error response
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Failed to delete student",
 			})
 			return
 		}
 
-		// log request complete
-		log.Info("Successfully deleted student",
-			"requestId", requestID,
-			"studentName", studentName,
-			"duration", time.Since(startTime).String(),
-		)
+		// Log success after deletion
+		extraFields["duration"] = time.Since(startTime).String()
+		sl.LogRequestInfo(log, "info", c, "Successfully deleted student", nil, extraFields)
 
-		// return request complete
+		// Return success response
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Student successfully deleted",
 		})

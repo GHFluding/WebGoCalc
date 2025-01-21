@@ -19,7 +19,7 @@ COPY . .
 
 
 RUN go build -o main ./cmd/apk/main.go
-
+COPY ./docs /docs
 # copy scripts and ru
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
@@ -41,6 +41,7 @@ COPY --from=builder /app/main /main
 COPY --from=builder /entrypoint.sh /entrypoint.sh
 COPY --from=builder /app/.env /.env
 COPY --from=builder /app/migrations /app/migrations
+COPY --from=builder /docs /docs
 # Делаем скрипты исполнимыми
 RUN chmod +x  /entrypoint.sh
 

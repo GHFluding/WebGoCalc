@@ -1,6 +1,6 @@
 CREATE TABLE students (
   id BIGSERIAL PRIMARY KEY,
-  name text NOT NULL UNIQUE,
+  name text NOT NULL,
   s_class text,
   school text,
   order_day SMALLINT,

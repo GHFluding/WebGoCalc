@@ -4,46 +4,76 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"test/internal/database/postgres"
 	"test/internal/server/http/middleware"
+	sl "test/internal/services/slogger"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
+// GetStudentByIdHandler возвращает информацию о студенте по ID.
+// @Summary      Получить информацию о студенте
+// @Description  Возвращает полную информацию о студенте по его ID.
+// @Tags         students
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "ID студента"
+// @Success      200  {object}  postgres.StudentSwagger
+// @Failure      400  {object}  map[string]interface{} "неверные данные"
+// @Failure      404  {object}  map[string]interface{} "нет такого id"
+// @Router       /api/students/{id} [get]
 
-func GetStudentByNameHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
+func GetStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get name from request
-		studentName := c.Param("name")
-		if studentName == "" {
-			log.Error("Missing student name in request")
+		// Retrieve student ID from the request parameters
+		studentIDParam := c.Param("id")
+		if studentIDParam == "" {
+			// Log the missing student ID error
+			sl.LogRequestInfo(log, "error", c, "Missing student ID in request", nil, nil)
+
+			// Return bad request response
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Student name is required",
+				"error": "Student ID is required",
 			})
 			return
 		}
 
-		// Create context and logs
-		ctx := context.Background()
+		// Convert student ID from string to int64
+		studentID, err := strconv.ParseInt(studentIDParam, 10, 64)
+		if err != nil {
+			// Log invalid student ID format error
+			sl.LogRequestInfo(log, "error", c, "Invalid student ID format", err, map[string]interface{}{
+				"studentIDParam": studentIDParam,
+			})
+
+			// Return bad request response
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Invalid student ID format",
+			})
+			return
+		}
+
+		// Start the request timer and log the incoming request
 		startTime := time.Now()
 		requestID := middleware.RequestIdFromContext(c)
-		log.Info("Handling GetStudentByName request",
-			"requestId", requestID,
-			"url", c.Request.URL.Path,
-			"method", c.Request.Method,
-			"studentName", studentName,
-		)
+		extraFields := map[string]interface{}{
+			"requestId": requestID,
+			"url":       c.Request.URL.Path,
+			"method":    c.Request.Method,
+			"studentID": studentID,
+		}
+		sl.LogRequestInfo(log, "info", c, "Handling GetStudentById request", nil, extraFields)
 
-		// Get data 
-		student, err := db.GetStudentByName(ctx, studentName)
+		// Fetch student data from the database
+		student, err := db.GetStudentById(context.Background(), studentID)
 		if err != nil {
-			log.Error("Failed to retrieve student",
-				"requestId", requestID,
-				"error", err.Error(),
-			)
+			// Log the error when failing to retrieve the student
+			extraFields["error"] = err.Error()
+			sl.LogRequestInfo(log, "error", c, "Failed to retrieve student", err, extraFields)
 
-			// If Student no in db 404
+			// If student is not found in the database
 			if err.Error() == "no rows in result set" {
 				c.JSON(http.StatusNotFound, gin.H{
 					"error": "Student not found",
@@ -51,21 +81,19 @@ func GetStudentByNameHandler(db postgres.Queries, log *slog.Logger) gin.HandlerF
 				return
 			}
 
-			// Errors
+			// Other errors
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Failed to retrieve student",
 			})
 			return
 		}
 
-		// Log
-		log.Info("Successfully retrieved student",
-			"requestId", requestID,
-			"studentId", student.ID,
-			"duration", time.Since(startTime).String(),
-		)
+		// Log success after retrieving student data
+		extraFields["studentId"] = student.ID
+		extraFields["duration"] = time.Since(startTime).String()
+		sl.LogRequestInfo(log, "info", c, "Successfully retrieved student", nil, extraFields)
 
-		// Return
+		// Return student data in the response
 		c.JSON(http.StatusOK, gin.H{
 			"student": student,
 		})

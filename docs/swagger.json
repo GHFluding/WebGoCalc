@@ -1,0 +1,221 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API для управления студентами и событиями в календаре.",
+        "title": "Student and Calendar API",
+        "termsOfService": "http://example.com/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "--",
+            "email": "--"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api",
+    "paths": {
+        "/api/calendar": {
+            "get": {
+                "description": "Возвращает события календаря на указанный день.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "calendar"
+                ],
+                "summary": "Получить список событий",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Дата в формате YYYY-MM-DD",
+                        "name": "date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/postgres.EventSwagger"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "неверные данные",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/students": {
+            "get": {
+                "description": "Получить все записи студентов",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получить список студентов",
+                "responses": {
+                    "200": {
+                        "description": "Список студентов",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/postgres.Student"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера\" // Используем map[string]interface{} для gin.H",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Добавляет нового студента в базу данных.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Создать студента",
+                "parameters": [
+                    {
+                        "description": "Данные студента",
+                        "name": "student",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/postgres.CreateStudentParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/postgres.Student"
+                        }
+                    },
+                    "400": {
+                        "description": "неверные данные",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "postgres.CreateStudentParams": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "orderCost": {
+                    "type": "integer"
+                },
+                "orderDay": {
+                    "type": "integer"
+                },
+                "orderTime": {
+                    "type": "string"
+                },
+                "school": {
+                    "type": "string"
+                },
+                "sclass": {
+                    "type": "string"
+                }
+            }
+        },
+        "postgres.EventSwagger": {
+            "type": "object",
+            "properties": {
+                "calendarID": {
+                    "type": "integer"
+                },
+                "eventDate": {
+                    "type": "string"
+                },
+                "orderCheck": {
+                    "type": "boolean"
+                },
+                "orderCost": {
+                    "type": "integer"
+                },
+                "orderTime": {
+                    "type": "string"
+                },
+                "studentID": {
+                    "type": "integer"
+                },
+                "studentName": {
+                    "type": "string"
+                }
+            }
+        },
+        "postgres.Student": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "orderCost": {
+                    "type": "string"
+                },
+                "orderDay": {
+                    "type": "integer"
+                },
+                "orderTime": {
+                    "type": "string"
+                },
+                "school": {
+                    "type": "string"
+                },
+                "sclass": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
