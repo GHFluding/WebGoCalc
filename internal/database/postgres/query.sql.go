@@ -13,49 +13,27 @@ import (
 
 const addEventsForDay = `-- name: AddEventsForDay :exec
 INSERT INTO calendar (student_id, event_date, order_time, order_cost)
-SELECT 
-    id AS student_id, 
-    $1::DATE AS event_date, 
-    order_time, 
-    order_cost
-FROM students
-WHERE order_day = CASE 
-    WHEN $2 = 0 THEN 7  -- Преобразование воскресенья
-    ELSE $2
-END
+VALUES ($1, $2::DATE, $3, $4)
 `
 
 type AddEventsForDayParams struct {
-	Column1 pgtype.Date
-	Column2 interface{}
+	StudentID int64
+	Column2   pgtype.Date
+	OrderTime pgtype.Time
+	OrderCost int16
 }
 
 func (q *Queries) AddEventsForDay(ctx context.Context, arg AddEventsForDayParams) error {
-	_, err := q.db.Exec(ctx, addEventsForDay, arg.Column1, arg.Column2)
-	return err
-}
-
-const addEventsForToday = `-- name: AddEventsForToday :exec
-INSERT INTO calendar (student_id, event_date, order_time, order_cost)
-SELECT 
-    id AS student_id, 
-    CURRENT_DATE AS event_date, 
-    order_time, 
-    order_cost
-FROM students
-WHERE order_day = CASE 
-    WHEN EXTRACT(DOW FROM CURRENT_DATE) = 0 THEN 7  -- Преобразование воскресенья
-    ELSE EXTRACT(DOW FROM CURRENT_DATE)
-END
-`
-
-func (q *Queries) AddEventsForToday(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, addEventsForToday)
+	_, err := q.db.Exec(ctx, addEventsForDay,
+		arg.StudentID,
+		arg.Column2,
+		arg.OrderTime,
+		arg.OrderCost,
+	)
 	return err
 }
 
 const createStudent = `-- name: CreateStudent :one
-
 INSERT INTO students (
   name, s_class, school, order_day, order_time, order_cost
 ) VALUES (
@@ -73,7 +51,6 @@ type CreateStudentParams struct {
 	OrderCost pgtype.Int2
 }
 
-// Сортировка по id вместо name
 func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (Student, error) {
 	row := q.db.QueryRow(ctx, createStudent,
 		arg.Name,
@@ -198,6 +175,39 @@ func (q *Queries) GetStudentById(ctx context.Context, id int64) (Student, error)
 		&i.OrderCost,
 	)
 	return i, err
+}
+
+const getStudentsByDay = `-- name: GetStudentsByDay :many
+SELECT id, name, s_class, school, order_day, order_time, order_cost FROM students 
+WHERE order_day = $1
+`
+
+func (q *Queries) GetStudentsByDay(ctx context.Context, orderDay pgtype.Int2) ([]Student, error) {
+	rows, err := q.db.Query(ctx, getStudentsByDay, orderDay)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Student
+	for rows.Next() {
+		var i Student
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.SClass,
+			&i.School,
+			&i.OrderDay,
+			&i.OrderTime,
+			&i.OrderCost,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listStudents = `-- name: ListStudents :many
