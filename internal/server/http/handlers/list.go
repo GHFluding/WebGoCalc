@@ -2,6 +2,7 @@ package handler
 
 import (
 	"log/slog"
+	"net/http"
 	"test/internal/database/postgres"
 	"test/internal/server/http/middleware"
 	"time"
@@ -42,6 +43,11 @@ func ListStudentsHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc 
 			// Log the error if fetching students fails
 			extraFields["error"] = err.Error()
 			sl.LogRequestInfo(log, "error", c, "Failed to retrieve students", err, extraFields)
+
+			// Return error response to the client
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Failed to retrieve students",
+			})
 			return
 		}
 
@@ -49,5 +55,10 @@ func ListStudentsHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc 
 		extraFields["count"] = len(students)
 		extraFields["duration"] = time.Since(startTime).String()
 		sl.LogRequestInfo(log, "info", c, "Successfully retrieved students", nil, extraFields)
+
+		// Return the list of students as a response
+		c.JSON(http.StatusOK, gin.H{
+			"students": students,
+		})
 	}
 }
