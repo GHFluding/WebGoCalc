@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"log/slog"
-	"net/http"
 	"test/internal/database/postgres"
 	"test/internal/server/http/middleware"
 	"time"
@@ -50,11 +49,6 @@ func DayListHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 			// Log the error if retrieving students fails
 			extraFields["error"] = err.Error()
 			sl.LogRequestInfo(log, "error", c, "Failed to retrieve students for this date", err, extraFields)
-
-			// Respond with an internal server error
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Failed to retrieve students for this date",
-			})
 			return
 		}
 		students, err := db.GetEventsByDate(context.Background(), today)
@@ -62,11 +56,6 @@ func DayListHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 			// Log the error if retrieving students fails
 			extraFields["error"] = err.Error()
 			sl.LogRequestInfo(log, "error", c, "Failed to retrieve students for this date", err, extraFields)
-
-			// Respond with an internal server error
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Failed to retrieve students for this date",
-			})
 			return
 		}
 
@@ -74,10 +63,5 @@ func DayListHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 		extraFields["count"] = len(students)
 		extraFields["duration"] = time.Since(startTime).String()
 		sl.LogRequestInfo(log, "info", c, "Successfully retrieved students", nil, extraFields)
-
-		// Return the list of students
-		c.JSON(http.StatusOK, gin.H{
-			"students": students,
-		})
 	}
 }

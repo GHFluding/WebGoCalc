@@ -59,7 +59,7 @@ WHERE event_date = $1;
 
 -- name: DeleteEventsByStudent :exec
 DELETE FROM calendar
-WHERE student_id = $1;
+WHERE id = $1;
 
 -- name: MarkEventAsChecked :exec
 UPDATE calendar

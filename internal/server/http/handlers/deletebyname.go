@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"log/slog"
-	"net/http"
 	"strconv"
 	"test/internal/database/postgres"
 	"test/internal/server/http/middleware"
@@ -32,11 +31,6 @@ func DeleteStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.Handler
 		if studentIDParam == "" {
 			// Log error if student ID is missing
 			sl.LogRequestInfo(log, "error", c, "Missing student ID in request", nil, nil)
-
-			// Return error response
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Student ID is required",
-			})
 			return
 		}
 
@@ -46,11 +40,6 @@ func DeleteStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.Handler
 			// Log error if student ID format is invalid
 			sl.LogRequestInfo(log, "error", c, "Invalid student ID format", err, map[string]interface{}{
 				"studentIDParam": studentIDParam,
-			})
-
-			// Return error response
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid student ID format",
 			})
 			return
 		}
@@ -72,21 +61,11 @@ func DeleteStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.Handler
 			// Log the error if deleting the student fails
 			extraFields["error"] = err.Error()
 			sl.LogRequestInfo(log, "error", c, "Failed to delete student", err, extraFields)
-
-			// Return error response
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Failed to delete student",
-			})
 			return
 		}
 
 		// Log success after deletion
 		extraFields["duration"] = time.Since(startTime).String()
 		sl.LogRequestInfo(log, "info", c, "Successfully deleted student", nil, extraFields)
-
-		// Return success response
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Student successfully deleted",
-		})
 	}
 }

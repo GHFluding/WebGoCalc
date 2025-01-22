@@ -2,7 +2,6 @@ package handler
 
 import (
 	"log/slog"
-	"net/http"
 	"test/internal/database/postgres"
 	"test/internal/server/http/middleware"
 	sl "test/internal/services/slogger"
@@ -48,9 +47,6 @@ func UpdateStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.Handler
 		// Bind JSON from the request body to the struct
 		if err := c.ShouldBindJSON(&req); err != nil {
 			sl.LogRequestInfo(log, "error", c, "Failed to bind request data", err, extraFields)
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid request payload",
-			})
 			return
 		}
 
@@ -61,9 +57,6 @@ func UpdateStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.Handler
 			extraFields["string"] = s //more massage with error
 			extraFields["error"] = err.Error()
 			sl.LogRequestInfo(log, "error", c, "Failed to update student", err, extraFields)
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
 			return
 		}
 
@@ -71,10 +64,5 @@ func UpdateStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.Handler
 		extraFields["name"] = req.Name
 		extraFields["duration"] = time.Since(startTime).String()
 		sl.LogRequestInfo(log, "info", c, "Successfully updated student", nil, extraFields)
-
-		// Return the success response
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Student updated successfully",
-		})
 	}
 }

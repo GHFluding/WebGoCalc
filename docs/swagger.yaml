@@ -1,6 +1,6 @@
 basePath: /api
 definitions:
-  postgres.CreateStudentParams:
+  postgres.CreateStudentSwagger:
     properties:
       name:
         type: string
@@ -32,7 +32,7 @@ definitions:
       studentName:
         type: string
     type: object
-  postgres.Student:
+  postgres.StudentSwagger:
     properties:
       id:
         type: integer
@@ -106,10 +106,10 @@ paths:
           description: Список студентов
           schema:
             items:
-              $ref: '#/definitions/postgres.Student'
+              $ref: '#/definitions/postgres.StudentSwagger'
             type: array
         "500":
-          description: Ошибка сервера" // Используем map[string]interface{} для gin.H
+          description: Ошибка сервера
           schema:
             additionalProperties: true
             type: object
@@ -124,14 +124,14 @@ paths:
         name: student
         required: true
         schema:
-          $ref: '#/definitions/postgres.CreateStudentParams'
+          $ref: '#/definitions/postgres.CreateStudentSwagger'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/postgres.Student'
+            $ref: '#/definitions/postgres.StudentSwagger'
         "400":
           description: неверные данные
           schema:

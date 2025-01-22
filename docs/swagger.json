@@ -80,12 +80,12 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/postgres.Student"
+                                "$ref": "#/definitions/postgres.StudentSwagger"
                             }
                         }
                     },
                     "500": {
-                        "description": "Ошибка сервера\" // Используем map[string]interface{} для gin.H",
+                        "description": "Ошибка сервера",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -112,7 +112,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/postgres.CreateStudentParams"
+                            "$ref": "#/definitions/postgres.CreateStudentSwagger"
                         }
                     }
                 ],
@@ -120,7 +120,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/postgres.Student"
+                            "$ref": "#/definitions/postgres.StudentSwagger"
                         }
                     },
                     "400": {
@@ -142,7 +142,7 @@
         }
     },
     "definitions": {
-        "postgres.CreateStudentParams": {
+        "postgres.CreateStudentSwagger": {
             "type": "object",
             "properties": {
                 "name": {
@@ -191,7 +191,7 @@
                 }
             }
         },
-        "postgres.Student": {
+        "postgres.StudentSwagger": {
             "type": "object",
             "properties": {
                 "id": {

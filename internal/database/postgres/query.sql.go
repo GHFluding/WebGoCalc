@@ -85,11 +85,11 @@ func (q *Queries) DeleteEventsByDate(ctx context.Context, eventDate pgtype.Date)
 
 const deleteEventsByStudent = `-- name: DeleteEventsByStudent :exec
 DELETE FROM calendar
-WHERE student_id = $1
+WHERE id = $1
 `
 
-func (q *Queries) DeleteEventsByStudent(ctx context.Context, studentID int64) error {
-	_, err := q.db.Exec(ctx, deleteEventsByStudent, studentID)
+func (q *Queries) DeleteEventsByStudent(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteEventsByStudent, id)
 	return err
 }
 
