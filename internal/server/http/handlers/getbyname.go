@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"log/slog"
+	"net/http"
 	"strconv"
 	"test/internal/database/postgres"
 	"test/internal/server/http/middleware"
@@ -81,5 +82,10 @@ func GetStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFun
 		extraFields["studentId"] = student.ID
 		extraFields["duration"] = time.Since(startTime).String()
 		sl.LogRequestInfo(log, "info", c, "Successfully retrieved student", nil, extraFields)
+
+		// Return student data in the response
+		c.JSON(http.StatusOK, gin.H{
+			"student": student,
+		})
 	}
 }

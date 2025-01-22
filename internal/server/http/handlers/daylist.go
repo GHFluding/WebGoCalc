@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"log/slog"
+	"net/http"
 	"test/internal/database/postgres"
 	"test/internal/server/http/middleware"
 	"time"
@@ -63,5 +64,10 @@ func DayListHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 		extraFields["count"] = len(students)
 		extraFields["duration"] = time.Since(startTime).String()
 		sl.LogRequestInfo(log, "info", c, "Successfully retrieved students", nil, extraFields)
+
+		// Return the list of students
+		c.JSON(http.StatusOK, gin.H{
+			"students": students,
+		})
 	}
 }

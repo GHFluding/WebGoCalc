@@ -46,8 +46,5 @@ func LogRequestInfo(log *slog.Logger, level string, c *gin.Context, message stri
 		})
 	} else if level == "info" {
 		log.Info(message, fieldsAny...)
-		c.JSON(http.StatusOK, gin.H{
-			"message": message,
-		})
 	}
 }
