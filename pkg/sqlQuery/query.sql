@@ -3,6 +3,10 @@ SELECT * FROM students
 WHERE id = $1 
 LIMIT 1;
 
+-- name: GetStudentsByDay :many
+SELECT * FROM students 
+WHERE order_day = $1;
+
 -- name: ListStudents :many
 SELECT * FROM students
 ORDER BY id; 
@@ -46,15 +50,8 @@ ORDER BY c.order_time;
 
 -- name: AddEventsForDay :exec
 INSERT INTO calendar (student_id, event_date, order_time, order_cost)
-SELECT 
-    id AS student_id, 
-    $1::DATE AS event_date, 
-    order_time, 
-    order_cost
-FROM students
-WHERE order_day = CASE 
-    WHEN $2 = 0 THEN 7  
-END;
+VALUES ($1, $2::DATE, $3, $4);
+
 
 -- name: DeleteEventsByDate :exec
 DELETE FROM calendar
@@ -62,22 +59,11 @@ WHERE event_date = $1;
 
 -- name: DeleteEventsByStudent :exec
 DELETE FROM calendar
-WHERE student_id = $1;
+WHERE id = $1;
 
 -- name: MarkEventAsChecked :exec
 UPDATE calendar
 SET order_check = TRUE
 WHERE student_id = $1 AND event_date = $2;
 
--- name: AddEventsForToday :exec
-INSERT INTO calendar (student_id, event_date, order_time, order_cost)
-SELECT 
-    id AS student_id, 
-    CURRENT_DATE AS event_date, 
-    order_time, 
-    order_cost
-FROM students
-WHERE order_day = CASE 
-    WHEN EXTRACT(DOW FROM CURRENT_DATE) = 0 THEN 7 
-    ELSE EXTRACT(DOW FROM CURRENT_DATE)
-END;
+

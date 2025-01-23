@@ -86,12 +86,12 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/postgres.Student"
+                                "$ref": "#/definitions/postgres.StudentSwagger"
                             }
                         }
                     },
                     "500": {
-                        "description": "Ошибка сервера\" // Используем map[string]interface{} для gin.H",
+                        "description": "Ошибка сервера",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -118,7 +118,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/postgres.CreateStudentParams"
+                            "$ref": "#/definitions/postgres.CreateStudentSwagger"
                         }
                     }
                 ],
@@ -126,7 +126,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/postgres.Student"
+                            "$ref": "#/definitions/postgres.StudentSwagger"
                         }
                     },
                     "400": {
@@ -148,7 +148,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "postgres.CreateStudentParams": {
+        "postgres.CreateStudentSwagger": {
             "type": "object",
             "properties": {
                 "name": {
@@ -197,7 +197,7 @@ const docTemplate = `{
                 }
             }
         },
-        "postgres.Student": {
+        "postgres.StudentSwagger": {
             "type": "object",
             "properties": {
                 "id": {

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"log/slog"
-	"net/http"
 	"test/internal/database/postgres"
 	"test/internal/server/http/middleware"
 	sl "test/internal/services/slogger"
@@ -44,9 +43,6 @@ func CreateStudentHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc
 			extraFields["string"] = s
 			extraFields["error"] = err.Error()
 			sl.LogRequestInfo(log, "error", c, "Failed to create student", err, extraFields)
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
 			return
 		}
 
@@ -54,10 +50,5 @@ func CreateStudentHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc
 		extraFields["studentId"] = student.ID
 		extraFields["duration"] = time.Since(startTime).String()
 		sl.LogRequestInfo(log, "info", c, "Successfully created student", nil, extraFields)
-
-		// Return result to user
-		c.JSON(http.StatusOK, gin.H{
-			"student": student,
-		})
 	}
 }

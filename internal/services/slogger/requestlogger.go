@@ -2,6 +2,7 @@ package sl
 
 import (
 	"log/slog"
+	"net/http"
 	"test/internal/server/http/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -40,6 +41,9 @@ func LogRequestInfo(log *slog.Logger, level string, c *gin.Context, message stri
 	if level == "error" && err != nil {
 		fieldsAny = append(fieldsAny, slog.String("error", error.Error(err))) // Log the error field (slog.Error(key, v) have problems)
 		log.Error(message, fieldsAny...)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": message,
+		})
 	} else if level == "info" {
 		log.Info(message, fieldsAny...)
 	}

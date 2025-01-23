@@ -32,11 +32,6 @@ func GetStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFun
 		if studentIDParam == "" {
 			// Log the missing student ID error
 			sl.LogRequestInfo(log, "error", c, "Missing student ID in request", nil, nil)
-
-			// Return bad request response
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Student ID is required",
-			})
 			return
 		}
 
@@ -46,11 +41,6 @@ func GetStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFun
 			// Log invalid student ID format error
 			sl.LogRequestInfo(log, "error", c, "Invalid student ID format", err, map[string]interface{}{
 				"studentIDParam": studentIDParam,
-			})
-
-			// Return bad request response
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid student ID format",
 			})
 			return
 		}
@@ -75,15 +65,15 @@ func GetStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFun
 
 			// If student is not found in the database
 			if err.Error() == "no rows in result set" {
-				c.JSON(http.StatusNotFound, gin.H{
-					"error": "Student not found",
+				sl.LogRequestInfo(log, "error", c, "Student not found", err, map[string]interface{}{
+					"studentIDParam": studentIDParam,
 				})
 				return
 			}
 
 			// Other errors
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Failed to retrieve student",
+			sl.LogRequestInfo(log, "error", c, "Failed to retrieve student", err, map[string]interface{}{
+				"studentIDParam": studentIDParam,
 			})
 			return
 		}

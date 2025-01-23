@@ -43,11 +43,6 @@ func ListStudentsHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc 
 			// Log the error if fetching students fails
 			extraFields["error"] = err.Error()
 			sl.LogRequestInfo(log, "error", c, "Failed to retrieve students", err, extraFields)
-
-			// Return error response to the client
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Failed to retrieve students",
-			})
 			return
 		}
 
