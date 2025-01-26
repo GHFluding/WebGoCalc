@@ -28,14 +28,11 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 #test container
-FROM alpine:latest AS test-stage-runner
-
-RUN apk update && apk add --no-cache bash libpq
+FROM scratch AS test-stage-runner
 
 WORKDIR /test
 
 COPY --from=builder /app/app.test /test/app.test
-COPY --from=builder /app/migrations /test/migrations
 COPY --from=builder /app/.env /test/.env
 
 # Запуск тестов
@@ -43,30 +40,25 @@ CMD ["./app.test", "-test.v"]
 
 
 
-RUN touch /test/test_completed
+
 
 
 
 
 
 # Этап с минимальным образом для исполнения
-FROM alpine:latest AS runner
-
-# Устанавливаем необходимые зависимости для выполнения
-RUN apk update && apk add --no-cache bash libpq
+FROM scratch AS runner
 
 # Копируем исполнимая программа и другие необходимые файлы
 
 COPY --from=builder /app/main /main
-COPY --from=builder /entrypoint.sh /entrypoint.sh
 COPY --from=builder /app/.env /.env
 COPY --from=builder /app/migrations /app/migrations
 COPY --from=builder /docs /docs
-# Делаем скрипты исполнимыми
-RUN chmod +x  /entrypoint.sh
+
 
 # Устанавливаем рабочую директорию
 WORKDIR /
 
 # Сделаем entrypoint для контейнера
-ENTRYPOINT ["/entrypoint.sh", "./main"]
+ENTRYPOINT ["./main"]

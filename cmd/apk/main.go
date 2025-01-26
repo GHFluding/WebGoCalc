@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log/slog"
+	"net/http"
 	"test/internal/config"
 	"test/internal/database/postgres"
 	handler "test/internal/server/http/handlers"
@@ -113,6 +114,15 @@ func main() {
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	//health check
+	r.GET("/health", func(c *gin.Context) {
+		// Здесь можно добавить проверку подключения к БД, очередям и т. д.
+		c.JSON(http.StatusOK, gin.H{
+			"status": "healthy",
+		})
+	})
+
 	r.Run(cfg.HTTPServer.Address)
 	//TODO: init controllers
 
