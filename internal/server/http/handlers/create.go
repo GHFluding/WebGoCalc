@@ -3,6 +3,7 @@ package handler
 import (
 	"log/slog"
 	"test/internal/database/postgres"
+	nocsqlcpg "test/internal/database/postgres/nosqlcpg"
 	"test/internal/server/http/middleware"
 	sl "test/internal/services/slogger"
 	"time"
@@ -36,7 +37,7 @@ func CreateStudentHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc
 		sl.LogRequestInfo(log, "info", c, "Handling CreateStudent request", nil, extraFields)
 
 		// Request for db
-		s, student, err := postgres.CreateStudentData(db, c, log)
+		s, student, err := nocsqlcpg.CreateStudentData(db, c, log)
 
 		// Handle errors
 		if err != nil {

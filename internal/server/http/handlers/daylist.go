@@ -45,13 +45,7 @@ func DayListHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 		today := pgtype.Date{Time: startTime, Valid: true}
 
 		// Fetch the events for today from the database
-		err := postgres.MoveStudentToday(db, log)
-		if err != nil {
-			// Log the error if retrieving students fails
-			extraFields["error"] = err.Error()
-			sl.LogRequestInfo(log, "error", c, "Failed to retrieve students for this date", err, extraFields)
-			return
-		}
+
 		students, err := db.GetEventsByDate(context.Background(), today)
 		if err != nil {
 			// Log the error if retrieving students fails

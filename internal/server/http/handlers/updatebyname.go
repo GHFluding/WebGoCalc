@@ -3,6 +3,7 @@ package handler
 import (
 	"log/slog"
 	"test/internal/database/postgres"
+	nocsqlcpg "test/internal/database/postgres/nosqlcpg"
 	"test/internal/server/http/middleware"
 	sl "test/internal/services/slogger"
 	"time"
@@ -51,7 +52,7 @@ func UpdateStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.Handler
 		}
 
 		// Call the database function to update the student data
-		s, err := postgres.UpdateStudentData(db, c, log)
+		s, err := nocsqlcpg.UpdateStudentData(db, c, log)
 		if err != nil {
 			// Log the error and return a failure response
 			extraFields["string"] = s //more massage with error
