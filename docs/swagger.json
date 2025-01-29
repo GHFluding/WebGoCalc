@@ -1,4 +1,14 @@
 {
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "schemes": [
+        "http",
+        "https"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "API для управления студентами и событиями в календаре.",
@@ -6,8 +16,8 @@
         "termsOfService": "http://example.com/terms/",
         "contact": {
             "name": "API Support",
-            "url": "--",
-            "email": "--"
+            "url": "http://http://81.177.220.96/",
+            "email": "lyoshabura@gmail.com"
         },
         "license": {
             "name": "MIT",
@@ -46,7 +56,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/postgres.EventSwagger"
+                                "$ref": "#/definitions/nocsqlcpg.StudentEventSwagger"
                             }
                         }
                     },
@@ -80,7 +90,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/postgres.StudentSwagger"
+                                "$ref": "#/definitions/nocsqlcpg.StudentSwagger"
                             }
                         }
                     },
@@ -112,7 +122,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/postgres.CreateStudentSwagger"
+                            "$ref": "#/definitions/nocsqlcpg.CreateStudentSwagger"
                         }
                     }
                 ],
@@ -120,7 +130,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/postgres.StudentSwagger"
+                            "$ref": "#/definitions/nocsqlcpg.StudentSwagger"
                         }
                     },
                     "400": {
@@ -142,7 +152,7 @@
         }
     },
     "definitions": {
-        "postgres.CreateStudentSwagger": {
+        "nocsqlcpg.CreateStudentSwagger": {
             "type": "object",
             "properties": {
                 "name": {
@@ -155,7 +165,7 @@
                     "type": "integer"
                 },
                 "orderTime": {
-                    "type": "string"
+                    "$ref": "#/definitions/nocsqlcpg.OrderTime"
                 },
                 "school": {
                     "type": "string"
@@ -165,33 +175,66 @@
                 }
             }
         },
-        "postgres.EventSwagger": {
+        "nocsqlcpg.EventDate": {
             "type": "object",
             "properties": {
-                "calendarID": {
+                "infinityModifier": {
                     "type": "integer"
                 },
-                "eventDate": {
+                "time": {
                     "type": "string"
                 },
-                "orderCheck": {
+                "valid": {
                     "type": "boolean"
+                }
+            }
+        },
+        "nocsqlcpg.OrderCheck": {
+            "type": "object",
+            "properties": {
+                "bool": {
+                    "type": "boolean"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "nocsqlcpg.OrderTime": {
+            "type": "object",
+            "properties": {
+                "microseconds": {
+                    "type": "integer"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "nocsqlcpg.StudentEventSwagger": {
+            "type": "object",
+            "properties": {
+                "eventDate": {
+                    "$ref": "#/definitions/nocsqlcpg.EventDate"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "orderCheck": {
+                    "$ref": "#/definitions/nocsqlcpg.OrderCheck"
                 },
                 "orderCost": {
                     "type": "integer"
                 },
                 "orderTime": {
-                    "type": "string"
+                    "$ref": "#/definitions/nocsqlcpg.OrderTime"
                 },
                 "studentID": {
                     "type": "integer"
-                },
-                "studentName": {
-                    "type": "string"
                 }
             }
         },
-        "postgres.StudentSwagger": {
+        "nocsqlcpg.StudentSwagger": {
             "type": "object",
             "properties": {
                 "id": {
@@ -201,13 +244,13 @@
                     "type": "string"
                 },
                 "orderCost": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "orderDay": {
                     "type": "integer"
                 },
                 "orderTime": {
-                    "type": "string"
+                    "$ref": "#/definitions/nocsqlcpg.OrderTime"
                 },
                 "school": {
                     "type": "string"

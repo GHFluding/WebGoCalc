@@ -16,7 +16,7 @@ import (
 // @Summary Получить список студентов
 // @Description Получить все записи студентов
 // @Produce json
-// @Success 200 {array} postgres.StudentSwagger "Список студентов"
+// @Success 200 {array} nocsqlcpg.StudentSwagger "Список студентов"
 // @Failure 500 {object} map[string]interface{} "Ошибка сервера"
 // @Router /api/students [get]
 func ListStudentsHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {

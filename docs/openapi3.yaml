@@ -1,0 +1,180 @@
+openapi: 3.0.1
+info:
+  title: Student and Calendar API
+  description: API для управления студентами и событиями в календаре.
+  termsOfService: http://example.com/terms/
+  contact:
+    name: API Support
+    url: http://http://81.177.220.96/
+    email: lyoshabura@gmail.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: "1.0"
+servers:
+- url: http://localhost:8080/api
+- url: https://localhost:8080/api
+paths:
+  /api/calendar:
+    get:
+      tags:
+      - calendar
+      summary: Получить список событий
+      description: Возвращает события календаря на указанный день.
+      parameters:
+      - name: date
+        in: query
+        description: Дата в формате YYYY-MM-DD
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/nocsqlcpg.StudentEventSwagger'
+        "400":
+          description: неверные данные
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "500":
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /api/students:
+    get:
+      summary: Получить список студентов
+      description: Получить все записи студентов
+      responses:
+        "200":
+          description: Список студентов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/nocsqlcpg.StudentSwagger'
+        "500":
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    post:
+      tags:
+      - students
+      summary: Создать студента
+      description: Добавляет нового студента в базу данных.
+      requestBody:
+        description: Данные студента
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/nocsqlcpg.CreateStudentSwagger'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/nocsqlcpg.StudentSwagger'
+        "400":
+          description: неверные данные
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "500":
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+      x-codegen-request-body-name: student
+components:
+  schemas:
+    nocsqlcpg.CreateStudentSwagger:
+      type: object
+      properties:
+        name:
+          type: string
+        orderCost:
+          type: integer
+        orderDay:
+          type: integer
+        orderTime:
+          $ref: '#/components/schemas/nocsqlcpg.OrderTime'
+        school:
+          type: string
+        sclass:
+          type: string
+    nocsqlcpg.EventDate:
+      type: object
+      properties:
+        infinityModifier:
+          type: integer
+        time:
+          type: string
+        valid:
+          type: boolean
+    nocsqlcpg.OrderCheck:
+      type: object
+      properties:
+        bool:
+          type: boolean
+        valid:
+          type: boolean
+    nocsqlcpg.OrderTime:
+      type: object
+      properties:
+        microseconds:
+          type: integer
+        valid:
+          type: boolean
+    nocsqlcpg.StudentEventSwagger:
+      type: object
+      properties:
+        eventDate:
+          $ref: '#/components/schemas/nocsqlcpg.EventDate'
+        id:
+          type: integer
+        orderCheck:
+          $ref: '#/components/schemas/nocsqlcpg.OrderCheck'
+        orderCost:
+          type: integer
+        orderTime:
+          $ref: '#/components/schemas/nocsqlcpg.OrderTime'
+        studentID:
+          type: integer
+    nocsqlcpg.StudentSwagger:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        orderCost:
+          type: integer
+        orderDay:
+          type: integer
+        orderTime:
+          $ref: '#/components/schemas/nocsqlcpg.OrderTime'
+        school:
+          type: string
+        sclass:
+          type: string
+x-original-swagger-version: "2.0"

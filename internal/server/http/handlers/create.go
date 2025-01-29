@@ -17,8 +17,8 @@ import (
 // @Tags         students
 // @Accept       json
 // @Produce      json
-// @Param        student  body  postgres.CreateStudentSwagger  true  "Данные студента"
-// @Success      201  {object}  postgres.StudentSwagger
+// @Param        student  body  nocsqlcpg.CreateStudentSwagger  true  "Данные студента"
+// @Success      201  {object}  nocsqlcpg.StudentSwagger
 // @Failure      400  {object}  map[string]interface{} "неверные данные"
 // @Failure 500 {object} map[string]interface{} "Ошибка сервера"
 // @Router       /api/students [post]

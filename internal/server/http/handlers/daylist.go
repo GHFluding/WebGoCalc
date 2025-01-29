@@ -21,7 +21,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param        date  query  string  true  "Дата в формате YYYY-MM-DD"
-// @Success      200  {array}  postgres.EventSwagger
+// @Success      200  {array}  nocsqlcpg.StudentEventSwagger
 // @Failure      400  {object}  map[string]interface{} "неверные данные"
 // @Failure 500 {object} map[string]interface{} "Ошибка сервера"
 // @Router       /api/calendar [get]

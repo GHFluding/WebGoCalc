@@ -17,9 +17,9 @@ import (
 // @Tags         students
 // @Accept       json
 // @Produce      json
-// @Param        id      path      int                          true  "ID студента"
-// @Param        student body      postgres.UpdateStudentParams true  "Данные для обновления"
-// @Success      200     {object}  postgres.StudentSwagger
+// @Param        id      path      int64                          true  "ID студента" format(id)
+// @Param        student body      nocsqlcpg.UpdateStudentSwagger true  "Данные для обновления"
+// @Success      200     {object}  nocsqlcpg.StudentSwagger
 // @Failure      400  {object}  map[string]interface{} "неверные данные"
 // @Failure      404  {object}  map[string]interface{} "нет такого id"
 // @Router       /api/students/{id} [patch]

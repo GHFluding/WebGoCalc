@@ -14,6 +14,7 @@ import (
 	sl "test/internal/services/slogger"
 
 	_ "test/docs"
+	_ "test/internal/database/postgres/nosqlcpg"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-migrate/migrate/v4"
@@ -29,14 +30,18 @@ import (
 // @termsOfService  http://example.com/terms/
 
 // @contact.name   API Support
-// @contact.url   --
-// @contact.email  --
+// @contact.url    http://http://81.177.220.96/
+// @contact.email  lyoshabura@gmail.com
 
 // @license.name  MIT
 // @license.url   https://opensource.org/licenses/MIT
 
 // @host      localhost:8080
 // @BasePath  /api
+
+// @schemes         http https
+// @accept          json
+// @produce         json
 
 func main() {
 	//init config: env

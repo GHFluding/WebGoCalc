@@ -1,6 +1,8 @@
 basePath: /api
+consumes:
+- application/json
 definitions:
-  postgres.CreateStudentSwagger:
+  nocsqlcpg.CreateStudentSwagger:
     properties:
       name:
         type: string
@@ -9,41 +11,62 @@ definitions:
       orderDay:
         type: integer
       orderTime:
-        type: string
+        $ref: '#/definitions/nocsqlcpg.OrderTime'
       school:
         type: string
       sclass:
         type: string
     type: object
-  postgres.EventSwagger:
+  nocsqlcpg.EventDate:
     properties:
-      calendarID:
+      infinityModifier:
         type: integer
-      eventDate:
+      time:
         type: string
-      orderCheck:
+      valid:
         type: boolean
+    type: object
+  nocsqlcpg.OrderCheck:
+    properties:
+      bool:
+        type: boolean
+      valid:
+        type: boolean
+    type: object
+  nocsqlcpg.OrderTime:
+    properties:
+      microseconds:
+        type: integer
+      valid:
+        type: boolean
+    type: object
+  nocsqlcpg.StudentEventSwagger:
+    properties:
+      eventDate:
+        $ref: '#/definitions/nocsqlcpg.EventDate'
+      id:
+        type: integer
+      orderCheck:
+        $ref: '#/definitions/nocsqlcpg.OrderCheck'
       orderCost:
         type: integer
       orderTime:
-        type: string
+        $ref: '#/definitions/nocsqlcpg.OrderTime'
       studentID:
         type: integer
-      studentName:
-        type: string
     type: object
-  postgres.StudentSwagger:
+  nocsqlcpg.StudentSwagger:
     properties:
       id:
         type: integer
       name:
         type: string
       orderCost:
-        type: string
+        type: integer
       orderDay:
         type: integer
       orderTime:
-        type: string
+        $ref: '#/definitions/nocsqlcpg.OrderTime'
       school:
         type: string
       sclass:
@@ -52,9 +75,9 @@ definitions:
 host: localhost:8080
 info:
   contact:
-    email: --
+    email: lyoshabura@gmail.com
     name: API Support
-    url: --
+    url: http://http://81.177.220.96/
   description: API для управления студентами и событиями в календаре.
   license:
     name: MIT
@@ -81,7 +104,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/postgres.EventSwagger'
+              $ref: '#/definitions/nocsqlcpg.StudentEventSwagger'
             type: array
         "400":
           description: неверные данные
@@ -106,7 +129,7 @@ paths:
           description: Список студентов
           schema:
             items:
-              $ref: '#/definitions/postgres.StudentSwagger'
+              $ref: '#/definitions/nocsqlcpg.StudentSwagger'
             type: array
         "500":
           description: Ошибка сервера
@@ -124,14 +147,14 @@ paths:
         name: student
         required: true
         schema:
-          $ref: '#/definitions/postgres.CreateStudentSwagger'
+          $ref: '#/definitions/nocsqlcpg.CreateStudentSwagger'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/postgres.StudentSwagger'
+            $ref: '#/definitions/nocsqlcpg.StudentSwagger'
         "400":
           description: неверные данные
           schema:
@@ -145,4 +168,9 @@ paths:
       summary: Создать студента
       tags:
       - students
+produces:
+- application/json
+schemes:
+- http
+- https
 swagger: "2.0"
