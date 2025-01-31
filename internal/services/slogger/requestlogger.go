@@ -3,7 +3,7 @@ package sl
 import (
 	"log/slog"
 	"net/http"
-	"test/internal/server/http/middleware"
+	"test/internal/transport/http/middleware"
 
 	"github.com/gin-gonic/gin"
 )

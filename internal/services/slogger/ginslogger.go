@@ -1,9 +1,9 @@
 package sl
 
 import (
-	"io/ioutil"
+	"io"
 	"log/slog"
-	"test/internal/server/http/middleware"
+	"test/internal/transport/http/middleware"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -38,7 +38,7 @@ func LoggingMiddleware(log *slog.Logger) gin.HandlerFunc {
 
 		// Optionally, you can log the request body or headers if needed
 		// For example, if you want to log the request body:
-		body, err := ioutil.ReadAll(c.Request.Body)
+		body, err := io.ReadAll(c.Request.Body)
 		if err == nil {
 			logger.Info("Request body", "body", string(body))
 		}

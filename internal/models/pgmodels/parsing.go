@@ -1,51 +1,15 @@
-package postgres
+package pgmodels
 
 import (
 	"context"
 	"log/slog"
 	"net/http"
+	"test/internal/database/postgres"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgtype"
 )
-
-// типы для swagger
-type StudentSwagger struct {
-	ID        int64
-	Name      string
-	SClass    string
-	School    string
-	OrderDay  int
-	OrderTime string
-	OrderCost string
-}
-type EventSwagger struct {
-	CalendarID  int64
-	StudentID   int64
-	StudentName string
-	EventDate   string
-	OrderTime   string
-	OrderCost   int16
-	OrderCheck  bool
-}
-type CreateStudentSwagger struct {
-	Name      string
-	SClass    string
-	School    string
-	OrderDay  int
-	OrderTime string
-	OrderCost int
-}
-type UpdateStudentParams struct {
-	ID        int64
-	Name      string
-	SClass    pgtype.Text
-	School    pgtype.Text
-	OrderDay  pgtype.Int2
-	OrderTime pgtype.Time
-	OrderCost pgtype.Int2
-}
 
 type request struct {
 	ID        int64  `json:"id"`
@@ -58,7 +22,7 @@ type request struct {
 }
 
 // check empty fields in struct
-func setDefaultValuesManually(req *request, student *Student, arg *UpdateStudentByIdParams) {
+func setDefaultValuesManually(req *request, student *postgres.Student, arg *postgres.UpdateStudentByIdParams) {
 
 	if req.Name == "" {
 		arg.Name = student.Name
@@ -113,33 +77,33 @@ func parseTime(c *gin.Context, r *request, log *slog.Logger) (pgtype.Time, error
 }
 
 // create sql request for Create students
-func CreateStudentData(db Queries, c *gin.Context, log *slog.Logger) (string, Student, error) {
+func CreateStudentData(db postgres.Queries, c *gin.Context, log *slog.Logger) (string, postgres.Student, error) {
 	req, err := parseRequest(c, log)
 	if err != nil {
-		return "Invalid request payload", Student{}, err
+		return "Invalid request payload", postgres.Student{}, err
 	}
 	pgTime, err := parseTime(c, &req, log)
 	if err != nil {
-		return "Invalid time format", Student{}, err
+		return "Invalid time format", postgres.Student{}, err
 	}
-	arg := CreateStudentParams{
+	arg := postgres.CreateStudentParams{
 		Name:      req.Name,
-		SClass:    pgtype.Text{String: req.Class, Valid: true},
-		School:    pgtype.Text{String: req.School, Valid: true},
-		OrderDay:  pgtype.Int2{Int16: req.OrderDay, Valid: true},
+		SClass:    req.Class,
+		School:    req.School,
+		OrderDay:  req.OrderDay,
 		OrderTime: pgTime,
-		OrderCost: pgtype.Int2{Int16: req.OrderCost, Valid: true},
+		OrderCost: req.OrderCost,
 	}
 	ctx := context.Background()
 	student, err := db.CreateStudent(ctx, arg)
 	if err != nil {
-		return "Failed to create student", Student{}, err
+		return "Failed to create student", postgres.Student{}, err
 	}
 	return "Successfully created student", student, err
 }
 
 // update students
-func UpdateStudentData(db Queries, c *gin.Context, log *slog.Logger) (string, error) {
+func UpdateStudentData(db postgres.Queries, c *gin.Context, log *slog.Logger) (string, error) {
 	req, err := parseRequest(c, log)
 	if err != nil {
 		return "Invalid request payload", err
@@ -150,14 +114,14 @@ func UpdateStudentData(db Queries, c *gin.Context, log *slog.Logger) (string, er
 	if err != nil {
 		return "Invalid time format", err
 	}
-	arg := UpdateStudentByIdParams{
+	arg := postgres.UpdateStudentByIdParams{
 		ID:        req.ID,
 		Name:      req.Name,
-		SClass:    pgtype.Text{String: req.Class, Valid: true},
-		School:    pgtype.Text{String: req.School, Valid: true},
-		OrderDay:  pgtype.Int2{Int16: req.OrderDay, Valid: true},
+		SClass:    req.Class,
+		School:    req.School,
+		OrderDay:  req.OrderDay,
 		OrderTime: pgTime,
-		OrderCost: pgtype.Int2{Int16: req.OrderCost, Valid: true},
+		OrderCost: req.OrderCost,
 	}
 	if ok == nil {
 		setDefaultValuesManually(&req, &student, &arg)

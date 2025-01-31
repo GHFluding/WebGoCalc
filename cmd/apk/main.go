@@ -6,15 +6,14 @@ import (
 	"log/slog"
 	"test/internal/config"
 	"test/internal/database/postgres"
-	handler "test/internal/server/http/handlers"
-	"test/internal/server/http/middleware"
+	handler "test/internal/transport/http/handlers"
+	"test/internal/transport/http/middleware"
 
 	// setup logger
 	"test/internal/services/event_generator"
 	sl "test/internal/services/slogger"
 
 	_ "test/docs"
-	_ "test/internal/database/postgres/nosqlcpg"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-migrate/migrate/v4"
@@ -55,7 +54,7 @@ func main() {
 	log.Debug("debug massages are enabled")
 
 	// connection to DB
-	dbpool, err := postgres.Connect(*cfg)
+	dbpool, err := pgmodels.Connect(*cfg)
 	if err != nil {
 		log.Info("Failed to connect to database: ", sl.Err(err))
 	}
