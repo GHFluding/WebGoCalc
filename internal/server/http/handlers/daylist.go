@@ -21,7 +21,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Param        date  query  string  true  "Дата в формате YYYY-MM-DD"
-// @Success      200  {array}  postgres.EventSwagger
+// @Success      200  {array}  nocsqlcpg.StudentEventSwagger
 // @Failure      400  {object}  map[string]interface{} "неверные данные"
 // @Failure 500 {object} map[string]interface{} "Ошибка сервера"
 // @Router       /api/calendar [get]
@@ -45,13 +45,7 @@ func DayListHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 		today := pgtype.Date{Time: startTime, Valid: true}
 
 		// Fetch the events for today from the database
-		err := postgres.MoveStudentToday(db, log)
-		if err != nil {
-			// Log the error if retrieving students fails
-			extraFields["error"] = err.Error()
-			sl.LogRequestInfo(log, "error", c, "Failed to retrieve students for this date", err, extraFields)
-			return
-		}
+
 		students, err := db.GetEventsByDate(context.Background(), today)
 		if err != nil {
 			// Log the error if retrieving students fails

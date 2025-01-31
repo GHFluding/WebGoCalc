@@ -3,6 +3,7 @@ package handler
 import (
 	"log/slog"
 	"test/internal/database/postgres"
+	nocsqlcpg "test/internal/database/postgres/nosqlcpg"
 	"test/internal/server/http/middleware"
 	sl "test/internal/services/slogger"
 	"time"
@@ -16,8 +17,8 @@ import (
 // @Tags         students
 // @Accept       json
 // @Produce      json
-// @Param        student  body  postgres.CreateStudentSwagger  true  "Данные студента"
-// @Success      201  {object}  postgres.StudentSwagger
+// @Param        student  body  nocsqlcpg.CreateStudentSwagger  true  "Данные студента"
+// @Success      201  {object}  nocsqlcpg.StudentSwagger
 // @Failure      400  {object}  map[string]interface{} "неверные данные"
 // @Failure 500 {object} map[string]interface{} "Ошибка сервера"
 // @Router       /api/students [post]
@@ -36,7 +37,7 @@ func CreateStudentHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc
 		sl.LogRequestInfo(log, "info", c, "Handling CreateStudent request", nil, extraFields)
 
 		// Request for db
-		s, student, err := postgres.CreateStudentData(db, c, log)
+		s, student, err := nocsqlcpg.CreateStudentData(db, c, log)
 
 		// Handle errors
 		if err != nil {

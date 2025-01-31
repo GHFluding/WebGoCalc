@@ -1,18 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
-	"net/http"
 	"test/internal/config"
 	"test/internal/database/postgres"
 	handler "test/internal/server/http/handlers"
 	"test/internal/server/http/middleware"
 
 	// setup logger
+	"test/internal/services/event_generator"
 	sl "test/internal/services/slogger"
 
 	_ "test/docs"
+	_ "test/internal/database/postgres/nosqlcpg"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-migrate/migrate/v4"
@@ -28,14 +30,18 @@ import (
 // @termsOfService  http://example.com/terms/
 
 // @contact.name   API Support
-// @contact.url   --
-// @contact.email  --
+// @contact.url    http://http://81.177.220.96/
+// @contact.email  lyoshabura@gmail.com
 
 // @license.name  MIT
 // @license.url   https://opensource.org/licenses/MIT
 
 // @host      localhost:8080
 // @BasePath  /api
+
+// @schemes         http https
+// @accept          json
+// @produce         json
 
 func main() {
 	//init config: env
@@ -81,13 +87,21 @@ func main() {
 
 	// use Queries
 	queries := postgres.New(dbpool)
-
+	// Initialize and run event generator
+	// Generate 12 weeks ahead
+	generator := event_generator.New(queries, 12)
+	if err := generator.GenerateEvents(context.Background(), log); err != nil {
+		log.Error("Event generation failed", sl.Err(err))
+	} else {
+		log.Info("Successfully generated future events")
+	}
 	// use DB here
 	_ = queries
 	//init router: gin-gonic
 	r := gin.Default()
 	r.Use(middleware.RequestIdMiddleware())
-	r.Use(sl.LoggingMiddleware(log)) //all loggers in package sl
+	//all loggers in package sl
+	r.Use(sl.LoggingMiddleware(log))
 	r.Use(middleware.RecoveryMiddleware(log))
 
 	//router group for work with table students
@@ -114,14 +128,6 @@ func main() {
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	//health check
-	r.GET("/health", func(c *gin.Context) {
-		// Здесь можно добавить проверку подключения к БД, очередям и т. д.
-		c.JSON(http.StatusOK, gin.H{
-			"status": "healthy",
-		})
-	})
 
 	r.Run(cfg.HTTPServer.Address)
 	//TODO: init controllers

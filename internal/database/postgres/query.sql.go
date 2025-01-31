@@ -12,7 +12,7 @@ import (
 )
 
 const addEventsForDay = `-- name: AddEventsForDay :exec
-INSERT INTO calendar (student_id, event_date, order_time, order_cost)
+INSERT INTO student_events (student_id, event_date, order_time, order_cost)
 VALUES ($1, $2::DATE, $3, $4)
 `
 
@@ -44,11 +44,11 @@ RETURNING id, name, s_class, school, order_day, order_time, order_cost
 
 type CreateStudentParams struct {
 	Name      string
-	SClass    pgtype.Text
-	School    pgtype.Text
-	OrderDay  pgtype.Int2
+	SClass    string
+	School    string
+	OrderDay  int16
 	OrderTime pgtype.Time
-	OrderCost pgtype.Int2
+	OrderCost int16
 }
 
 func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (Student, error) {
@@ -74,7 +74,7 @@ func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (S
 }
 
 const deleteEventsByDate = `-- name: DeleteEventsByDate :exec
-DELETE FROM calendar
+DELETE FROM student_events
 WHERE event_date = $1
 `
 
@@ -84,7 +84,7 @@ func (q *Queries) DeleteEventsByDate(ctx context.Context, eventDate pgtype.Date)
 }
 
 const deleteEventsByStudent = `-- name: DeleteEventsByStudent :exec
-DELETE FROM calendar
+DELETE FROM student_events
 WHERE id = $1
 `
 
@@ -105,27 +105,27 @@ func (q *Queries) DeleteStudentById(ctx context.Context, id int64) error {
 
 const getEventsByDate = `-- name: GetEventsByDate :many
 SELECT 
-    c.id AS calendar_id,
+    c.id AS student_events_id,
     s.id AS student_id,
     s.name AS student_name,
     c.event_date,
     c.order_time,
     c.order_cost,
     c.order_check
-FROM calendar c
+FROM student_events c
 JOIN students s ON c.student_id = s.id
 WHERE c.event_date = $1
 ORDER BY c.order_time
 `
 
 type GetEventsByDateRow struct {
-	CalendarID  int64
-	StudentID   int64
-	StudentName string
-	EventDate   pgtype.Date
-	OrderTime   pgtype.Time
-	OrderCost   int16
-	OrderCheck  pgtype.Bool
+	StudentEventsID int64
+	StudentID       int64
+	StudentName     string
+	EventDate       pgtype.Date
+	OrderTime       pgtype.Time
+	OrderCost       int16
+	OrderCheck      pgtype.Bool
 }
 
 func (q *Queries) GetEventsByDate(ctx context.Context, eventDate pgtype.Date) ([]GetEventsByDateRow, error) {
@@ -138,7 +138,7 @@ func (q *Queries) GetEventsByDate(ctx context.Context, eventDate pgtype.Date) ([
 	for rows.Next() {
 		var i GetEventsByDateRow
 		if err := rows.Scan(
-			&i.CalendarID,
+			&i.StudentEventsID,
 			&i.StudentID,
 			&i.StudentName,
 			&i.EventDate,
@@ -177,13 +177,13 @@ func (q *Queries) GetStudentById(ctx context.Context, id int64) (Student, error)
 	return i, err
 }
 
-const getStudentsByDay = `-- name: GetStudentsByDay :many
+const getStudentsById = `-- name: GetStudentsById :many
 SELECT id, name, s_class, school, order_day, order_time, order_cost FROM students 
 WHERE order_day = $1
 `
 
-func (q *Queries) GetStudentsByDay(ctx context.Context, orderDay pgtype.Int2) ([]Student, error) {
-	rows, err := q.db.Query(ctx, getStudentsByDay, orderDay)
+func (q *Queries) GetStudentsById(ctx context.Context, orderDay int16) ([]Student, error) {
+	rows, err := q.db.Query(ctx, getStudentsById, orderDay)
 	if err != nil {
 		return nil, err
 	}
@@ -244,7 +244,7 @@ func (q *Queries) ListStudents(ctx context.Context) ([]Student, error) {
 }
 
 const markEventAsChecked = `-- name: MarkEventAsChecked :exec
-UPDATE calendar
+UPDATE student_events
 SET order_check = TRUE
 WHERE student_id = $1 AND event_date = $2
 `
@@ -274,11 +274,11 @@ WHERE id = $1
 type UpdateStudentByIdParams struct {
 	ID        int64
 	Name      string
-	SClass    pgtype.Text
-	School    pgtype.Text
-	OrderDay  pgtype.Int2
+	SClass    string
+	School    string
+	OrderDay  int16
 	OrderTime pgtype.Time
-	OrderCost pgtype.Int2
+	OrderCost int16
 }
 
 func (q *Queries) UpdateStudentById(ctx context.Context, arg UpdateStudentByIdParams) error {

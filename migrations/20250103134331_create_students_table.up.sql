@@ -2,9 +2,9 @@
 CREATE TABLE students (
   id BIGSERIAL PRIMARY KEY,
   name text NOT NULL,
-  s_class text,
-  school text,
-  order_day SMALLINT,
-  order_time TIME,
-  order_cost SMALLINT
+  s_class text NOT NULL,
+  school text NOT NULL,
+  order_day SMALLINT NOT NULL,
+  order_time TIME NOT NULL,
+  order_cost SMALLINT NOT NULL
 );

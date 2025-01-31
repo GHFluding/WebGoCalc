@@ -3,6 +3,7 @@ package handler
 import (
 	"log/slog"
 	"test/internal/database/postgres"
+	nocsqlcpg "test/internal/database/postgres/nosqlcpg"
 	"test/internal/server/http/middleware"
 	sl "test/internal/services/slogger"
 	"time"
@@ -16,9 +17,9 @@ import (
 // @Tags         students
 // @Accept       json
 // @Produce      json
-// @Param        id      path      int                          true  "ID студента"
-// @Param        student body      postgres.UpdateStudentParams true  "Данные для обновления"
-// @Success      200     {object}  postgres.StudentSwagger
+// @Param        id      path      int64                          true  "ID студента" format(id)
+// @Param        student body      nocsqlcpg.UpdateStudentSwagger true  "Данные для обновления"
+// @Success      200     {object}  nocsqlcpg.StudentSwagger
 // @Failure      400  {object}  map[string]interface{} "неверные данные"
 // @Failure      404  {object}  map[string]interface{} "нет такого id"
 // @Router       /api/students/{id} [patch]
@@ -51,7 +52,7 @@ func UpdateStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.Handler
 		}
 
 		// Call the database function to update the student data
-		s, err := postgres.UpdateStudentData(db, c, log)
+		s, err := nocsqlcpg.UpdateStudentData(db, c, log)
 		if err != nil {
 			// Log the error and return a failure response
 			extraFields["string"] = s //more massage with error

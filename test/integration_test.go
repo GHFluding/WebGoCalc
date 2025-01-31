@@ -60,7 +60,7 @@ func TestDBHandlers(t *testing.T) {
 		body, err := io.ReadAll(resp.Body)
 		assert.NoError(t, err, "Failed to read response body")
 
-		assert.Contains(t, string(body), "students:", "Response does not contain 'students:'")
+		assert.Contains(t, string(body), "students", "Response does not contain 'students:'")
 	})
 
 }

@@ -18,7 +18,7 @@ import (
 // @Tags         students
 // @Accept       json
 // @Produce      json
-// @Param        id   path      int  true  "ID события"
+// @Param        id   path      int64    "ID события" format(id)
 // @Success      204
 // @Failure      400  {object}  map[string]interface{} "неверные данные"
 // @Failure      404  {object}  map[string]interface{} "нет такого id"
