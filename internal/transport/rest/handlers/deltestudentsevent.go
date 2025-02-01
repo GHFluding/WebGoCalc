@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"strconv"
 	"test/internal/database/postgres"
-	sl "test/internal/services/slogger"
 	"test/internal/transport/rest/middleware"
+	sl "test/internal/utils/slogger"
 	"time"
 
 	"github.com/gin-gonic/gin"

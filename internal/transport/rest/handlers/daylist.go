@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgtype"
 
-	sl "test/internal/services/slogger"
+	sl "test/internal/utils/slogger"
 )
 
 // DayListHandler возвращает список событий на день.

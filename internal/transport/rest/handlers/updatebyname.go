@@ -4,8 +4,8 @@ import (
 	"log/slog"
 	"test/internal/database/postgres"
 	"test/internal/models/pgmodels"
-	sl "test/internal/services/slogger"
 	"test/internal/transport/rest/middleware"
+	sl "test/internal/utils/slogger"
 	"time"
 
 	"github.com/gin-gonic/gin"

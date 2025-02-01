@@ -12,7 +12,7 @@ import (
 
 	// setup logger
 	"test/internal/services/event_generator"
-	sl "test/internal/services/slogger"
+	sl "test/internal/utils/slogger"
 
 	_ "test/docs"
 

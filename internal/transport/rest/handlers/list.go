@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	sl "test/internal/services/slogger"
+	sl "test/internal/utils/slogger"
 )
 
 // ListStudentsHandler - Обработчик для получения списка студентов

@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"test/internal/database/postgres"
-	sl "test/internal/services/slogger"
+	sl "test/internal/utils/slogger"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
