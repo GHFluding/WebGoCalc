@@ -10,24 +10,16 @@ RUN wget -qO- https://github.com/golang-migrate/migrate/releases/download/v4.15.
 WORKDIR /app
 
 ENV GOPROXY=direct
-COPY ././migrations /app/migrations
+COPY ../../build/migrations /app/migrations/
 
-COPY ././go.mod ././go.sum ./
+COPY ../../go.mod ../../go.sum ./
 RUN go mod download
 
-COPY ././ .
+COPY ../../. .
 
 
 RUN go build -o main ./cmd/apk/main.go
-COPY ./docs /docs
-
-COPY ./test/integration_test.go /test/integration_test.go
-RUN go test -c -o app.test ./test/integration_test.go
-
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-
+COPY ../../docs/ /docs/
 
 
 # Этап с минимальным образом для исполнения

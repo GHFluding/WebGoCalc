@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 	"test/internal/database/postgres"
-	"test/internal/server/http/middleware"
+	"test/internal/transport/rest/middleware"
 	"time"
 
 	"github.com/gin-gonic/gin"

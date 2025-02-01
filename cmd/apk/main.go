@@ -6,8 +6,9 @@ import (
 	"log/slog"
 	"test/internal/config"
 	"test/internal/database/postgres"
-	handler "test/internal/transport/http/handlers"
-	"test/internal/transport/http/middleware"
+	"test/internal/models/pgmodels"
+	handler "test/internal/transport/rest/handlers"
+	"test/internal/transport/rest/middleware"
 
 	// setup logger
 	"test/internal/services/event_generator"

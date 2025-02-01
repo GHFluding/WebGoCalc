@@ -1,4 +1,4 @@
-package nocsqlcpg
+package pgmodels
 
 import (
 	"time"
@@ -6,7 +6,7 @@ import (
 
 // Datatype for swagger docs
 type DateSwagger struct {
-	string
+	Date string
 }
 
 type StudentSwagger struct {
