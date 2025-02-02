@@ -3,9 +3,9 @@ package handler
 import (
 	"log/slog"
 	"test/internal/database/postgres"
-	nocsqlcpg "test/internal/database/postgres/nosqlcpg"
-	"test/internal/server/http/middleware"
-	sl "test/internal/services/slogger"
+	"test/internal/models/pgmodels"
+	"test/internal/transport/rest/middleware"
+	sl "test/internal/utils/slogger"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -52,7 +52,7 @@ func UpdateStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.Handler
 		}
 
 		// Call the database function to update the student data
-		s, err := nocsqlcpg.UpdateStudentData(db, c, log)
+		s, err := pgmodels.UpdateStudentData(db, c, log)
 		if err != nil {
 			// Log the error and return a failure response
 			extraFields["string"] = s //more massage with error

@@ -4,12 +4,12 @@ import (
 	"log/slog"
 	"net/http"
 	"test/internal/database/postgres"
-	"test/internal/server/http/middleware"
+	"test/internal/transport/rest/middleware"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
-	sl "test/internal/services/slogger"
+	sl "test/internal/utils/slogger"
 )
 
 // ListStudentsHandler - Обработчик для получения списка студентов

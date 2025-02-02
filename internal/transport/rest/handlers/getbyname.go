@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 	"test/internal/database/postgres"
-	"test/internal/server/http/middleware"
-	sl "test/internal/services/slogger"
+	"test/internal/transport/rest/middleware"
+	sl "test/internal/utils/slogger"
 	"time"
 
 	"github.com/gin-gonic/gin"

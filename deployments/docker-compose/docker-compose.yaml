@@ -1,18 +1,24 @@
-
 services:
   nginx:
+    env_file:
+      - ../../../backend/configs/env/.env
+    build:
+      context: ../../.
     image: nginx:stable-alpine
     container_name: webgocalc_nginx
     ports:
       - "80:80"
     volumes:
-      - './nginx/nginx.conf:/etc/nginx/nginx.conf:ro' # конфигурация nginx
+      - '/configs/nginx/nginx.conf:/etc/nginx/nginx.conf:ro' # конфигурация nginx
     networks:
       - app-network
     depends_on:
       - backend
 
+
   postgres:
+    env_file:
+      - ../../../backend/configs/env/.env
     image: postgres:17
     container_name: webgocalc_postgres
     environment:
@@ -21,7 +27,6 @@ services:
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-scripts:/docker-entrypoint-initdb.d
     networks:
       - app-network
     healthcheck:
@@ -30,31 +35,12 @@ services:
       timeout: 5s
       retries: 5
 
-  test:
+  backend:    
+    env_file:
+      - ../../../backend/configs/env/.env
     build:
-      context: .
-      dockerfile: Dockerfile
-      target: test-stage-runner
-    container_name: webgocalc_test
-    environment:
-      ENV: ${ENV}
-      STORAGE_HOST: webgocalc_postgres
-      STORAGE_PORT: ${DB_PORT}
-      STORAGE_USER: ${DB_USER}
-      STORAGE_PASSWORD: ${DB_PASSWORD}
-      STORAGE_DBNAME: ${DB_NAME}
-      HTTP_SERVER_ADDRESS: ${HTTP_SERVER_ADDRESS}
-      HTTP_SERVER_TIMEOUT: ${HTTP_SERVER_TIMEOUT}
-      HTTP_SERVER_IDLE_TIMEOUT: ${HTTP_SERVER_IDLE_TIMEOUT}
-    depends_on:
-     - nginx
-    networks:
-      - app-network
-
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../../../backend/
+      dockerfile: ./build/docker/Dockerfile
       target: runner
     container_name: webgocalc_app
     environment:
@@ -72,6 +58,7 @@ services:
         condition: service_healthy
     networks:
       - app-network
+
 
 volumes:
   postgres_data:

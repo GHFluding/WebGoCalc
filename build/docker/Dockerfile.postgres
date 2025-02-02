@@ -1,0 +1,6 @@
+FROM postgres:17
+
+# Устанавливаем переменные окружения для PostgreSQL
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=postgres
+
