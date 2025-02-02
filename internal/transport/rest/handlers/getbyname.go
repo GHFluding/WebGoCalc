@@ -61,7 +61,6 @@ func GetStudentByIdHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFun
 		if err != nil {
 			// Log the error when failing to retrieve the student
 			extraFields["error"] = err.Error()
-			sl.LogRequestInfo(log, "error", c, "Failed to retrieve student", err, extraFields)
 
 			// If student is not found in the database
 			if err.Error() == "no rows in result set" {

@@ -28,7 +28,7 @@ FROM scratch AS runner
 # Копируем исполнимая программа и другие необходимые файлы
 
 COPY --from=builder /app/main /main
-COPY --from=builder /app/.env /.env
+COPY --from=builder /app/configs/env/.env /configs/env/.env
 COPY --from=builder /app/migrations /app/migrations
 COPY --from=builder /docs /docs
 
