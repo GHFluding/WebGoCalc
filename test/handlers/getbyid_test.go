@@ -19,6 +19,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const StudentID = int64(1)
+const StudentName = "John Doe"
+const StudentClass = "10A"
+const School = "Springfield HS"
+const OrderDay = int16(5)
+const OrderCost = int16(2500)
+const DateTime = "15:30:00"
+
 func String(t pgtype.Time) string {
 	return time.UnixMicro(t.Microseconds).UTC().Format("15:04:05")
 }
@@ -26,25 +34,23 @@ func String(t pgtype.Time) string {
 func TestGetStudentByIdHandler(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	testLogger := slog.New(slog.NewTextHandler(io.Discard, nil))
-
+	OrderTime := pgtype.Time{
+		Microseconds: time.Date(0, 1, 1, 15, 30, 0, 0, time.UTC).UnixMicro(),
+		Valid:        true,
+	}
 	t.Run("Успешное получение студента", func(t *testing.T) {
 		mockDB := &mocks.MockDB{
 			QueryRowFunc: func(ctx context.Context, sql string, args ...interface{}) pgx.Row {
 				slog.Info("Mock DB QueryRow called", "sql", sql, "args", args)
-				orderTime := pgtype.Time{
-					Microseconds: time.Date(0, 1, 1, 15, 30, 0, 0, time.UTC).UnixMicro(),
-					Valid:        true,
-				}
-
 				return &mocks.MockRow{
 					Data: []interface{}{
-						int64(1),
-						"John Doe",
-						"10A",
-						"Springfield HS",
-						int16(5),
-						orderTime,
-						int16(2500),
+						StudentID,
+						StudentName,
+						StudentClass,
+						School,
+						OrderDay,
+						OrderTime,
+						OrderCost,
 					},
 				}
 			},
@@ -76,15 +82,15 @@ func TestGetStudentByIdHandler(t *testing.T) {
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
 
-		assert.Equal(t, int64(1), response.Student.ID)
-		assert.Equal(t, "John Doe", response.Student.Name)
-		assert.Equal(t, "10A", response.Student.SClass)
-		assert.Equal(t, "Springfield HS", response.Student.School)
-		assert.Equal(t, int16(5), response.Student.OrderDay)
-		assert.Equal(t, int16(2500), response.Student.OrderCost)
+		assert.Equal(t, StudentID, response.Student.ID)
+		assert.Equal(t, StudentName, response.Student.Name)
+		assert.Equal(t, StudentClass, response.Student.SClass)
+		assert.Equal(t, School, response.Student.School)
+		assert.Equal(t, OrderDay, response.Student.OrderDay)
+		assert.Equal(t, OrderCost, response.Student.OrderCost)
 
 		formattedTime := time.UnixMicro(response.Student.OrderTime.Microseconds).UTC().Format("15:04:05")
-		assert.Equal(t, "15:30:00", formattedTime)
+		assert.Equal(t, DateTime, formattedTime)
 
 	})
 }
