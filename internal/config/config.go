@@ -34,7 +34,8 @@ type Storage struct {
 
 // MustLoad loads the configuration from environment variables
 func MustLoad() *Config {
-	err := godotenv.Load()
+	envPath := "../../configs/env/.env"
+	err := godotenv.Load(envPath)
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}

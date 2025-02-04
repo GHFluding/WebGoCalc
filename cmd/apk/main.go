@@ -10,8 +10,9 @@ import (
 	handler "test/internal/transport/rest/handlers"
 	"test/internal/transport/rest/middleware"
 
+	"test/internal/services/eventGenerator"
 	// setup logger
-	"test/internal/services/event_generator"
+
 	sl "test/internal/utils/slogger"
 
 	_ "test/docs"
@@ -89,7 +90,7 @@ func main() {
 	queries := postgres.New(dbpool)
 	// Initialize and run event generator
 	// Generate 12 weeks ahead
-	generator := event_generator.New(queries, 12)
+	generator := eventGenerator.New(queries, 12)
 	if err := generator.GenerateEvents(context.Background(), log); err != nil {
 		log.Error("Event generation failed", sl.Err(err))
 	} else {

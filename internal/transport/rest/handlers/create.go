@@ -22,6 +22,7 @@ import (
 // @Failure      400  {object}  map[string]interface{} "неверные данные"
 // @Failure 500 {object} map[string]interface{} "Ошибка сервера"
 // @Router       /api/students [post]
+
 func CreateStudentHandler(db postgres.Queries, log *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Start the request timer
